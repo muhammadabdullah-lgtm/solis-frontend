@@ -1,38 +1,35 @@
+import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 function EmptyCart() {
   const navigate = useNavigate();
 
   return (
-    <div className="bg-gray-100 p-6 rounded-lg flex flex-col md:flex-row items-center justify-between">
-      
+    <div className="bg-gray-50 min-h-[70vh] flex items-center justify-center px-4">
+      <div className="text-center max-w-sm mx-auto">
+        {/* Icon */}
+        <div className="flex justify-center mb-6">
+          <div className="w-28 h-28 bg-[#feee00] rounded-full flex items-center justify-center">
+            <ShoppingCart size={50} strokeWidth={1.5} className="text-black" />
+          </div>
+        </div>
 
-      <div className="text-center md:text-left max-w-md">
-        <h2 className="text-2xl font-semibold">
-          Your shopping cart looks empty.
+        <h2 className="text-2xl font-bold text-gray-900">
+          Your cart is empty
         </h2>
-
-        <p className="text-gray-500 mt-2">
-          What are you waiting for?
+        <p className="text-gray-500 mt-2 text-sm leading-relaxed">
+          Looks like you haven't added anything yet.
+          <br />
+          Start browsing and find something you love!
         </p>
 
         <button
           onClick={() => navigate("/")}
-          className="mt-4 bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
+          className="mt-6 bg-[#feee00] text-black font-semibold px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-sm"
         >
-          START SHOPPING
+          Start Shopping
         </button>
       </div>
-
-
-      <div className="mt-6 md:mt-0">
-        <img
-          src="/empty-cart.png"
-          alt="empty cart"
-          className="w-[200px] md:w-[250px]"
-        />
-      </div>
-
     </div>
   );
 }
