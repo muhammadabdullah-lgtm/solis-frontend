@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Menu,
   X,
@@ -9,8 +9,10 @@ import {
   Heart,
   ShoppingCart,
   ChevronDown,
+  LogOut,
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
+import { useAuth } from "../../context/AuthContext";
 import SearchBar from "./SearchBar";
 
 const NAV_CATEGORIES = [
@@ -28,9 +30,43 @@ const NAV_CATEGORIES = [
 
 function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState("All");
+  const [accountOpen, setAccountOpen] = useState(false);
+  const accountRef = useRef<HTMLDivElement>(null);
+
   const { cartCount } = useCart();
+  const { user, isAuthenticated, signOut } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+
+  const toSlug = (cat: string) =>
+    cat.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+
+  const handleCategoryClick = (cat: string) => {
+    if (cat === "All") {
+      navigate("/");
+    } else {
+      navigate(`/category/${toSlug(cat)}`);
+    }
+    setDrawerOpen(false);
+  };
+
+  const isActiveCat = (cat: string) => {
+    if (cat === "All") return pathname === "/";
+    return pathname === `/category/${toSlug(cat)}`;
+  };
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (
+        accountRef.current &&
+        !accountRef.current.contains(e.target as Node)
+      ) {
+        setAccountOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <header className="sticky top-0 z-50">
@@ -55,11 +91,47 @@ function Header() {
             </div>
 
             <div className="flex items-center gap-5 shrink-0">
-              <NavAction
-                icon={<User size={20} />}
-                label="Sign In"
-                onClick={() => {}}
-              />
+              {!isAuthenticated && (
+                <NavAction
+                  icon={<User size={20} />}
+                  label="Sign In"
+                  onClick={() => navigate("/sign-in")}
+                />
+              )}
+
+              {isAuthenticated && (
+                <div className="relative" ref={accountRef}>
+                  <button
+                    onClick={() => setAccountOpen((o) => !o)}
+                    className="flex flex-col items-center gap-0.5 text-black hover:opacity-70 transition-opacity"
+                  >
+                    <div className="w-6 h-6 bg-black text-[#feee00] rounded-full flex items-center justify-center text-[10px] font-bold leading-none">
+                      {user?.name.charAt(0).toUpperCase()}
+                    </div>
+                    <span className="text-[11px] font-medium leading-none">
+                      {user?.name.split(" ")[0]}
+                    </span>
+                  </button>
+
+                  {accountOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl border border-gray-100 shadow-lg py-1 z-50">
+                      <p className="px-4 py-2 text-xs text-gray-400 border-b border-gray-100 truncate">
+                        {user?.email}
+                      </p>
+                      <button
+                        onClick={() => {
+                          signOut();
+                          setAccountOpen(false);
+                        }}
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut size={14} /> Sign Out
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <NavAction
                 icon={<Heart size={20} />}
                 label="Wishlist"
@@ -103,9 +175,9 @@ function Header() {
             {NAV_CATEGORIES.map((cat) => (
               <button
                 key={cat}
-                onClick={() => setActiveCategory(cat)}
+                onClick={() => handleCategoryClick(cat)}
                 className={`whitespace-nowrap text-sm px-3 py-1.5 rounded-full font-medium shrink-0 transition-colors ${
-                  activeCategory === cat
+                  isActiveCat(cat)
                     ? "bg-[#feee00] text-black"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
@@ -120,7 +192,26 @@ function Header() {
       {drawerOpen && (
         <div className="md:hidden bg-white border-b shadow-lg">
           <nav className="px-4 py-2 divide-y divide-gray-100">
-            <DrawerItem icon={<User size={18} />} label="Sign In / Register" />
+            {!isAuthenticated ? (
+              <DrawerItem
+                icon={<User size={18} />}
+                label="Sign In / Register"
+                onClick={() => {
+                  navigate("/sign-in");
+                  setDrawerOpen(false);
+                }}
+              />
+            ) : (
+              <DrawerItem
+                icon={<LogOut size={18} />}
+                label={`Sign Out (${user?.name.split(" ")[0]})`}
+                onClick={() => {
+                  signOut();
+                  setDrawerOpen(false);
+                }}
+                danger
+              />
+            )}
             <DrawerItem icon={<Heart size={18} />} label="Wishlist" />
             <DrawerItem
               icon={<MapPin size={18} />}
@@ -133,11 +224,10 @@ function Header() {
               {NAV_CATEGORIES.filter((c) => c !== "All").map((cat) => (
                 <button
                   key={cat}
-                  onClick={() => {
-                    setActiveCategory(cat);
-                    setDrawerOpen(false);
-                  }}
-                  className="block w-full text-left py-2 text-sm text-gray-700 hover:text-black transition-colors"
+                  onClick={() => handleCategoryClick(cat)}
+                  className={`block w-full text-left py-2 text-sm transition-colors ${
+                    isActiveCat(cat) ? "text-black font-semibold" : "text-gray-700 hover:text-black"
+                  }`}
                 >
                   {cat}
                 </button>
@@ -197,10 +287,27 @@ function CartButton({
   );
 }
 
-function DrawerItem({ icon, label }: { icon: ReactNode; label: string }) {
+function DrawerItem({
+  icon,
+  label,
+  onClick,
+  danger,
+}: {
+  icon: ReactNode;
+  label: string;
+  onClick?: () => void;
+  danger?: boolean;
+}) {
   return (
-    <button className="flex items-center gap-3 w-full py-3 text-sm text-gray-700 hover:text-black transition-colors">
-      <span className="text-gray-500">{icon}</span>
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-3 w-full py-3 text-sm transition-colors ${
+        danger
+          ? "text-red-500 hover:text-red-600"
+          : "text-gray-700 hover:text-black"
+      }`}
+    >
+      <span className={danger ? "text-red-400" : "text-gray-500"}>{icon}</span>
       {label}
     </button>
   );
