@@ -1,18 +1,25 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
+import type { ApiUser } from "../api/authApi";
 
 export interface AuthUser {
+  id: number;
   name: string;
   email: string;
+  role: string;
+  authSource: string;
   avatar?: string;
 }
 
 interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
+
+  loginUser: (apiUser: ApiUser, token?: string) => void;
+
   signIn: (email: string, password: string) => void;
+
   signInWithGoogle: () => void;
-  signUp: (name: string, email: string, password: string) => void;
   signOut: () => void;
 }
 
@@ -21,23 +28,34 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
 
+  const loginUser = (apiUser: ApiUser, token?: string) => {
+    if (token) localStorage.setItem("auth_token", token);
+    setUser({
+      id: apiUser.id,
+      name: apiUser.full_name,
+      email: apiUser.email,
+      role: apiUser.role,
+      authSource: apiUser.auth_source,
+    });
+  };
+
   const signIn = (email: string, _password: string) => {
-    // TODO: replace with real API call (POST /auth/sign-in)
     const name = email.split("@")[0].replace(/[._]/g, " ");
-    setUser({ name, email });
+    setUser({ id: 0, name, email, role: "user", authSource: "email" });
   };
 
   const signInWithGoogle = () => {
-    // TODO: replace with Google OAuth SDK (e.g. @react-oauth/google)
-    setUser({ name: "Google User", email: "user@gmail.com" });
-  };
-
-  const signUp = (name: string, email: string, _password: string) => {
-    // TODO: replace with real API call (POST /auth/sign-up)
-    setUser({ name, email });
+    setUser({
+      id: 0,
+      name: "Google User",
+      email: "user@gmail.com",
+      role: "user",
+      authSource: "google",
+    });
   };
 
   const signOut = () => {
+    localStorage.removeItem("auth_token");
     setUser(null);
   };
 
@@ -46,9 +64,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isAuthenticated: !!user,
+        loginUser,
         signIn,
         signInWithGoogle,
-        signUp,
         signOut,
       }}
     >
