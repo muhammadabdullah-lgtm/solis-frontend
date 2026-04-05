@@ -1,52 +1,79 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { ReactNode } from "react";
-import type { Product, CartItem } from "../types";
+import { useAuth } from "./AuthContext";
+import {
+  getCart,
+  addCartItem,
+  updateCartItem,
+  removeCartItem,
+  clearCartApi,
+} from "../api/cartApi";
+import type { ApiCart } from "../api/cartApi";
 
 interface CartContextValue {
-  cart: CartItem[];
+  cart: ApiCart | null;
   cartCount: number;
-  addToCart: (product: Product) => void;
-  removeFromCart: (productId: number) => void;
-  updateQuantity: (productId: number, amount: number) => void;
+  loading: boolean;
+  addToCart: (productId: number, quantity?: number) => Promise<void>;
+  removeFromCart: (itemId: number) => Promise<void>;
+  updateQuantity: (itemId: number, quantity: number) => Promise<void>;
+  clearCart: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const { isAuthenticated } = useAuth();
+  const [cart, setCart] = useState<ApiCart | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const addToCart = (product: Product) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing) {
-        return prev.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      }
-      return [...prev, { product, quantity: 1 }];
-    });
+  const fetchCart = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await getCart();
+      setCart(data);
+    } catch {
+      setCart(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchCart();
+    } else {
+      setCart(null);
+    }
+  }, [isAuthenticated, fetchCart]);
+
+  const addToCart = async (productId: number, quantity = 1) => {
+    await addCartItem(productId, quantity);
+    await fetchCart();
   };
 
-  const removeFromCart = (productId: number) => {
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
+  const removeFromCart = async (itemId: number) => {
+    await removeCartItem(itemId);
+    await fetchCart();
   };
 
-  const updateQuantity = (productId: number, amount: number) => {
-    setCart((prev) =>
-      prev.map((item) =>
-        item.product.id === productId
-          ? { ...item, quantity: Math.max(1, item.quantity + amount) }
-          : item
-      )
-    );
+  const updateQuantity = async (itemId: number, quantity: number) => {
+    if (quantity < 1) return;
+    await updateCartItem(itemId, quantity);
+    await fetchCart();
   };
 
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const clearCart = async () => {
+    await clearCartApi();
+    await fetchCart();
+  };
+
+  const cartCount = cart?.total_items ?? 0;
 
   return (
-    <CartContext.Provider value={{ cart, cartCount, addToCart, removeFromCart, updateQuantity }}>
+    <CartContext.Provider
+      value={{ cart, cartCount, loading, addToCart, removeFromCart, updateQuantity, clearCart }}
+    >
       {children}
     </CartContext.Provider>
   );

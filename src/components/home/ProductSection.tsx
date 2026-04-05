@@ -5,13 +5,12 @@ import type { Product } from "../../types";
 interface Props {
   title: string;
   products: Product[];
-  addToCart: (product: Product) => void;
+  addToCart: (productId: number) => void;
 }
 
 function ProductSection({ title, products, addToCart }: Props) {
   return (
     <section className="mt-10">
-      {/* Section heading */}
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-bold text-gray-900">{title}</h2>
@@ -22,7 +21,6 @@ function ProductSection({ title, products, addToCart }: Props) {
         </button>
       </div>
 
-      {/* Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => (
           <ProductCard

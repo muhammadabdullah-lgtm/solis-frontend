@@ -4,7 +4,7 @@ import type { Product } from "../../types";
 
 interface ProductCardProps {
   product: Product;
-  addToCart: (product: Product) => void;
+  addToCart: (productId: number) => void;
 }
 
 function ProductCard({ product, addToCart }: ProductCardProps) {
@@ -12,16 +12,13 @@ function ProductCard({ product, addToCart }: ProductCardProps) {
 
   return (
     <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 group flex flex-col">
-      {/* ── Image area ── */}
       <div className="relative overflow-hidden rounded-t-xl">
-        {/* Badge */}
         {product.badge && (
           <span className="absolute top-2 left-2 z-10 bg-[#feee00] text-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
             {product.badge}
           </span>
         )}
 
-        {/* Wishlist */}
         <button
           onClick={() => setWishlisted((w) => !w)}
           className="absolute top-2 right-2 z-10 bg-white/80 backdrop-blur-sm rounded-full p-1.5 hover:bg-white transition-colors"
@@ -35,7 +32,6 @@ function ProductCard({ product, addToCart }: ProductCardProps) {
           />
         </button>
 
-        {/* Image */}
         <img
           src={product.image}
           alt={product.title}
@@ -43,14 +39,11 @@ function ProductCard({ product, addToCart }: ProductCardProps) {
         />
       </div>
 
-      {/* ── Info ── */}
       <div className="p-3 flex flex-col flex-1">
-        {/* Title */}
         <h3 className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug flex-1">
           {product.title}
         </h3>
 
-        {/* Rating */}
         {product.rating !== undefined && (
           <div className="flex items-center gap-1 mt-1.5">
             <StarRating rating={product.rating} />
@@ -62,7 +55,6 @@ function ProductCard({ product, addToCart }: ProductCardProps) {
           </div>
         )}
 
-        {/* Price row */}
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <span className="text-base font-bold text-gray-900">
             ${product.price.toLocaleString()}
@@ -79,9 +71,8 @@ function ProductCard({ product, addToCart }: ProductCardProps) {
           )}
         </div>
 
-        {/* Add to Cart */}
         <button
-          onClick={() => addToCart(product)}
+          onClick={() => addToCart(product.id)}
           className="mt-3 w-full flex items-center justify-center gap-2 bg-[#feee00] text-black text-sm font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity"
         >
           <ShoppingCart size={14} />
@@ -92,7 +83,6 @@ function ProductCard({ product, addToCart }: ProductCardProps) {
   );
 }
 
-/* ── Star rating ── */
 function StarRating({ rating }: { rating: number }) {
   const full = Math.floor(rating);
   const half = rating - full >= 0.5;
@@ -106,8 +96,8 @@ function StarRating({ rating }: { rating: number }) {
             s <= full
               ? "text-amber-400"
               : s === full + 1 && half
-              ? "text-amber-300"
-              : "text-gray-200"
+                ? "text-amber-300"
+                : "text-gray-200"
           }`}
         >
           ★
