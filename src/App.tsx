@@ -8,6 +8,7 @@ import SignUp from "./pages/SignUp";
 import ProductListing from "./pages/ProductListing";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
+import { CategoriesProvider } from "./context/CategoriesContext";
 
 const AUTH_ROUTES = ["/sign-in", "/sign-up"];
 
@@ -35,9 +36,11 @@ function AppLayout() {
 function App() {
   return (
     <AuthProvider>
-      <CartProvider>
-        <AppLayout />
-      </CartProvider>
+      <CategoriesProvider>
+        <CartProvider>
+          <AppLayout />
+        </CartProvider>
+      </CategoriesProvider>
     </AuthProvider>
   );
 }

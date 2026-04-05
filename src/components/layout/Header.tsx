@@ -13,20 +13,8 @@ import {
 } from "lucide-react";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
+import { useCategories } from "../../context/CategoriesContext";
 import SearchBar from "./SearchBar";
-
-const NAV_CATEGORIES = [
-  "All",
-  "Electronics",
-  "Fashion",
-  "Home & Living",
-  "Beauty & Health",
-  "Grocery",
-  "Sports",
-  "Toys & Baby",
-  "Automotive",
-  "Books",
-];
 
 function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -35,24 +23,22 @@ function Header() {
 
   const { cartCount } = useCart();
   const { user, isAuthenticated, signOut } = useAuth();
+  const { categories } = useCategories();
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const toSlug = (cat: string) =>
-    cat.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-
-  const handleCategoryClick = (cat: string) => {
-    if (cat === "All") {
+  const handleCategoryClick = (slug: string | null) => {
+    if (!slug) {
       navigate("/");
     } else {
-      navigate(`/category/${toSlug(cat)}`);
+      navigate(`/category/${slug}`);
     }
     setDrawerOpen(false);
   };
 
-  const isActiveCat = (cat: string) => {
-    if (cat === "All") return pathname === "/";
-    return pathname === `/category/${toSlug(cat)}`;
+  const isActiveCat = (slug: string | null) => {
+    if (!slug) return pathname === "/";
+    return pathname === `/category/${slug}`;
   };
 
   useEffect(() => {
@@ -172,17 +158,28 @@ function Header() {
             className="flex items-center gap-1 overflow-x-auto py-2"
             style={{ scrollbarWidth: "none" }}
           >
-            {NAV_CATEGORIES.map((cat) => (
+            <button
+              key="all"
+              onClick={() => handleCategoryClick(null)}
+              className={`whitespace-nowrap text-sm px-3 py-1.5 rounded-full font-medium shrink-0 transition-colors ${
+                isActiveCat(null)
+                  ? "bg-[#feee00] text-black"
+                  : "text-gray-600 hover:bg-gray-100"
+              }`}
+            >
+              All
+            </button>
+            {categories.map((cat) => (
               <button
-                key={cat}
-                onClick={() => handleCategoryClick(cat)}
+                key={cat.id}
+                onClick={() => handleCategoryClick(cat.slug)}
                 className={`whitespace-nowrap text-sm px-3 py-1.5 rounded-full font-medium shrink-0 transition-colors ${
-                  isActiveCat(cat)
+                  isActiveCat(cat.slug)
                     ? "bg-[#feee00] text-black"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                {cat}
+                {cat.name}
               </button>
             ))}
           </div>
@@ -221,15 +218,15 @@ function Header() {
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Categories
               </p>
-              {NAV_CATEGORIES.filter((c) => c !== "All").map((cat) => (
+              {categories.map((cat) => (
                 <button
-                  key={cat}
-                  onClick={() => handleCategoryClick(cat)}
+                  key={cat.id}
+                  onClick={() => handleCategoryClick(cat.slug)}
                   className={`block w-full text-left py-2 text-sm transition-colors ${
-                    isActiveCat(cat) ? "text-black font-semibold" : "text-gray-700 hover:text-black"
+                    isActiveCat(cat.slug) ? "text-black font-semibold" : "text-gray-700 hover:text-black"
                   }`}
                 >
-                  {cat}
+                  {cat.name}
                 </button>
               ))}
             </div>
