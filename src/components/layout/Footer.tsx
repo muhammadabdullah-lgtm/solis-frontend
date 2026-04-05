@@ -23,7 +23,7 @@ const footerLinks = [
   },
   {
     heading: "About Solis",
-    links: ["About Us", "Careers", "Press", "Sell on Solis", "Sustainability"],
+    links: ["About Us", "Careers", "Press", "Sustainability"],
   },
 ];
 
@@ -108,7 +108,7 @@ function Footer() {
               <div className="mt-5 space-y-2 text-sm text-gray-400">
                 <div className="flex items-center gap-2">
                   <MapPin size={13} className="text-[#feee00] shrink-0" />
-                  <span>Karachi, Pakistan</span>
+                  <span>Lahore, Pakistan</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Phone size={13} className="text-[#feee00] shrink-0" />

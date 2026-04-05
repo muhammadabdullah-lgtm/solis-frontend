@@ -64,7 +64,7 @@ function ApiProductCard({ product }: { product: ApiProduct }) {
           {product.average_rating !== null ? (
             <StarRating
               rating={product.average_rating}
-              count={product.review_count}
+              count={product.reviews_count}
             />
           ) : (
             <span className="text-xs text-gray-400">No reviews</span>

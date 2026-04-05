@@ -7,6 +7,7 @@ import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import ProductListing from "./pages/ProductListing";
 import Products from "./pages/Products";
+import ProductDetail from "./pages/ProductDetail";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
 import { CategoriesProvider } from "./context/CategoriesContext";
@@ -28,6 +29,7 @@ function AppLayout() {
         <Route path="/sign-up" element={<SignUp />} />
         <Route path="/category/:slug" element={<ProductListing />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
       </Routes>
 
       {!isAuthPage && <Footer />}
