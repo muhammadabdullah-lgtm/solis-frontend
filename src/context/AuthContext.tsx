@@ -1,6 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
 import type { ApiUser } from "../api/authApi";
+import { signOut as signOutApi } from "../api/authApi";
 
 export interface AuthUser {
   id: number;
@@ -20,7 +21,7 @@ interface AuthContextValue {
   signIn: (email: string, password: string) => void;
 
   signInWithGoogle: () => void;
-  signOut: () => void;
+  signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -54,7 +55,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const signOut = () => {
+  const signOut = async () => {
+    try {
+      await signOutApi();
+    } catch {}
     localStorage.removeItem("auth_token");
     setUser(null);
   };

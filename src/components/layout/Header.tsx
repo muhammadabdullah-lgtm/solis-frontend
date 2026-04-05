@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
   Menu,
   X,
@@ -20,7 +20,9 @@ import SearchBar from "./SearchBar";
 function Header() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [hoveredCategoryId, setHoveredCategoryId] = useState<number | null>(null);
+  const [hoveredCategoryId, setHoveredCategoryId] = useState<number | null>(
+    null,
+  );
   const accountRef = useRef<HTMLDivElement>(null);
 
   const { cartCount } = useCart();
@@ -35,7 +37,9 @@ function Header() {
 
   const isActiveCat = (catId: number | null) => {
     if (catId === null)
-      return pathname === "/" || (pathname === "/products" && !activeCategoryId);
+      return (
+        pathname === "/" || (pathname === "/products" && !activeCategoryId)
+      );
     return activeCategoryId === catId;
   };
 
@@ -49,7 +53,6 @@ function Header() {
     setDrawerOpen(false);
   };
 
-  // Close account dropdown on outside click
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -63,7 +66,6 @@ function Header() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Close mega menu on route change
   useEffect(() => {
     setHoveredCategoryId(null);
   }, [pathname, search]);
@@ -121,12 +123,19 @@ function Header() {
                       <p className="px-4 py-2 text-xs text-gray-400 border-b border-gray-100 truncate">
                         {user?.email}
                       </p>
+                      <Link
+                        to="/orders"
+                        onClick={() => setAccountOpen(false)}
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        My Orders
+                      </Link>
                       <button
                         onClick={() => {
                           signOut();
                           setAccountOpen(false);
                         }}
-                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
                       >
                         <LogOut size={14} /> Sign Out
                       </button>
@@ -210,19 +219,20 @@ function Header() {
         </div>
 
         {/* Mega menu panel */}
-        {hoveredCategory && (hoveredCategory.subcategories?.length ?? 0) > 0 && (
-          <div
-            className="absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl z-40"
-            onMouseEnter={() => setHoveredCategoryId(hoveredCategory.id)}
-          >
-            <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
-              <MegaMenu
-                category={hoveredCategory}
-                onNavigate={handleCategoryClick}
-              />
+        {hoveredCategory &&
+          (hoveredCategory.subcategories?.length ?? 0) > 0 && (
+            <div
+              className="absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl z-40"
+              onMouseEnter={() => setHoveredCategoryId(hoveredCategory.id)}
+            >
+              <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
+                <MegaMenu
+                  category={hoveredCategory}
+                  onNavigate={handleCategoryClick}
+                />
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </div>
 
       {/* ── Mobile drawer ── */}
@@ -250,10 +260,7 @@ function Header() {
               />
             )}
             <DrawerItem icon={<Heart size={18} />} label="Wishlist" />
-            <DrawerItem
-              icon={<MapPin size={18} />}
-              label="Deliver to UAE"
-            />
+            <DrawerItem icon={<MapPin size={18} />} label="Deliver to UAE" />
             <div className="pt-3 pb-2">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
                 Categories

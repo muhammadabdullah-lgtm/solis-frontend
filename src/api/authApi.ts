@@ -61,6 +61,10 @@ export interface GoogleAuthResponse {
   token: string;
 }
 
+export async function signOut(): Promise<void> {
+  await axiosInstance.delete("/api/v1/auth/sign_out");
+}
+
 export async function googleAuth(
   payload: GoogleAuthPayload,
 ): Promise<GoogleAuthResponse> {
