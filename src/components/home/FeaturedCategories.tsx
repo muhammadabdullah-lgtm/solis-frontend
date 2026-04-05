@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useCategories } from "../../context/CategoriesContext";
 import SectionError from "../ui/SectionError";
+import SectionEmpty from "../ui/SectionEmpty";
 
 const SLUG_EMOJI: Record<string, string> = {
   electronics: "💻",
@@ -33,6 +34,8 @@ function FeaturedCategories() {
 
       {error ? (
         <SectionError onRetry={retry} />
+      ) : categories.length === 0 ? (
+        <SectionEmpty icon="🗂️" message="No categories available right now." />
       ) : (
         <div
           className="flex gap-3 overflow-x-auto pb-1"

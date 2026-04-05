@@ -5,6 +5,7 @@ import { getProducts } from "../../api/productsApi";
 import type { ApiProduct } from "../../api/productsApi";
 import ApiProductCard from "../product/ApiProductCard";
 import SectionError from "../ui/SectionError";
+import SectionEmpty from "../ui/SectionEmpty";
 
 function NewArrivals() {
   const [products, setProducts] = useState<ApiProduct[]>([]);
@@ -53,6 +54,8 @@ function NewArrivals() {
         </div>
       ) : error ? (
         <SectionError onRetry={fetch} />
+      ) : products.length === 0 ? (
+        <SectionEmpty icon="📦" message="No new arrivals yet. Check back soon!" />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((product) => (

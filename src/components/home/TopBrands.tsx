@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getBrands } from "../../api/brandsApi";
 import type { ApiBrand } from "../../api/brandsApi";
 import SectionError from "../ui/SectionError";
+import SectionEmpty from "../ui/SectionEmpty";
 
 function TopBrands() {
   const [brands, setBrands] = useState<ApiBrand[]>([]);
@@ -34,6 +35,8 @@ function TopBrands() {
 
       {error ? (
         <SectionError onRetry={fetch} />
+      ) : brands.length === 0 ? (
+        <SectionEmpty icon="🏷️" message="No brands available right now." />
       ) : (
         <div className="flex flex-wrap gap-2">
           {brands.map((brand) => (

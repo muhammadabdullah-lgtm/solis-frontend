@@ -4,6 +4,7 @@ import { getProducts } from "../api/productsApi";
 import type { ApiProduct } from "../api/productsApi";
 import ApiProductCard from "../components/product/ApiProductCard";
 import SectionError from "../components/ui/SectionError";
+import SectionEmpty from "../components/ui/SectionEmpty";
 
 function Products() {
   const [searchParams] = useSearchParams();
@@ -61,9 +62,7 @@ function Products() {
         ) : error ? (
           <SectionError onRetry={fetch} />
         ) : products.length === 0 ? (
-          <div className="text-center py-20 text-gray-400 text-sm">
-            No products found.
-          </div>
+          <SectionEmpty icon="🔍" message="No products found for this selection." />
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {products.map((product) => (
