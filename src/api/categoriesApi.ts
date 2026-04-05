@@ -5,6 +5,7 @@ export interface ApiSubcategory {
   name: string;
   slug: string;
   parent_id: number;
+  subcategories?: ApiSubcategory[];
 }
 
 export interface ApiCategory {
