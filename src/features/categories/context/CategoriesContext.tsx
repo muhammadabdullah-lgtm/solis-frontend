@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { ReactNode } from "react";
-import { getCategories } from "../api/categoriesApi";
-import type { ApiCategory } from "../api/categoriesApi";
+import { getCategories } from "../../../services/categories.service";
+import type { ApiCategory } from "../../../services/categories.service";
 
 interface CategoriesContextValue {
   categories: ApiCategory[];

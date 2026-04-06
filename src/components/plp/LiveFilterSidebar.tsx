@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
-import type { ApiCategory, ApiSubcategory } from "../../api/categoriesApi";
-import type { ApiBrand } from "../../api/brandsApi";
+import type { ApiCategory, ApiSubcategory } from "../../services/categories.service";
+import type { ApiBrand } from "../../services/brands.service";
 
 export interface LiveFilterDraft {
   categoryId: number | null;

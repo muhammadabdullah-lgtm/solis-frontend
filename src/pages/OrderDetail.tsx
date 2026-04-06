@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, MapPin, Star, X } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
-import { getOrder } from "../api/ordersApi";
-import type { OrderDetail as IOrderDetail, OrderItem } from "../api/ordersApi";
-import { createReview } from "../api/productsApi";
+import { getOrder } from "../services/orders.service";
+import type { OrderDetail as IOrderDetail, OrderItem } from "../services/orders.service";
+import { createReview } from "../services/products.service";
 import { StatusBadge } from "./Orders";
 
 // ─── Review Modal ─────────────────────────────────────────────────────────────
@@ -136,7 +135,6 @@ function ReviewModal({ item, currency, onClose, onSubmitted }: ReviewModalProps)
 function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
 
   const [order, setOrder] = useState<IOrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -145,10 +143,6 @@ function OrderDetail() {
   const [reviewedItemIds, setReviewedItemIds] = useState<Set<number>>(new Set());
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/sign-in", { replace: true });
-      return;
-    }
     if (!id) return;
     setLoading(true);
     setError(false);
@@ -156,7 +150,7 @@ function OrderDetail() {
       .then((data) => setOrder(data))
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [id, isAuthenticated]);
+  }, [id]);
 
   const handleReviewSubmitted = (itemId: number) => {
     setReviewedItemIds((prev) => new Set(prev).add(itemId));

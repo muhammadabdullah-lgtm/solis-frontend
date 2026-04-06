@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { getOrders } from "../api/ordersApi";
-import type { OrderSummary, OrderStatus } from "../api/ordersApi";
+import { Link } from "react-router-dom";
+import { getOrders } from "../services/orders.service";
+import type { OrderSummary, OrderStatus } from "../services/orders.service";
 import SectionError from "../components/ui/SectionError";
 import SectionEmpty from "../components/ui/SectionEmpty";
 
@@ -15,20 +14,13 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
 };
 
 function Orders() {
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-
   const [orders, setOrders] = useState<OrderSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate("/sign-in", { replace: true });
-      return;
-    }
     fetchOrders();
-  }, [isAuthenticated]);
+  }, []);
 
   const fetchOrders = () => {
     setLoading(true);

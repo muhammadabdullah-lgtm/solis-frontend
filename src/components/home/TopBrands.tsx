@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getBrands } from "../../api/brandsApi";
-import type { ApiBrand } from "../../api/brandsApi";
+import { getBrands } from "../../services/brands.service";
+import type { ApiBrand } from "../../services/brands.service";
 import SectionError from "../ui/SectionError";
 import SectionEmpty from "../ui/SectionEmpty";
 

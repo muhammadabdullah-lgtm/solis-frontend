@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
-import { getProducts } from "../api/productsApi";
-import type { ApiProduct, Pagination } from "../api/productsApi";
-import { getBrands } from "../api/brandsApi";
-import type { ApiBrand } from "../api/brandsApi";
-import { useCategories } from "../context/CategoriesContext";
-import ApiProductCard from "../components/product/ApiProductCard";
+import { getProducts } from "../services/products.service";
+import type { ApiProduct, Pagination } from "../services/products.service";
+import { getBrands } from "../services/brands.service";
+import type { ApiBrand } from "../services/brands.service";
+import { useCategories } from "../features/categories/context/CategoriesContext";
+import ProductCard from "../components/product/ProductCard";
 import LiveFilterSidebar from "../components/plp/LiveFilterSidebar";
 import type { LiveFilterDraft } from "../components/plp/LiveFilterSidebar";
 import SectionError from "../components/ui/SectionError";
@@ -435,7 +435,7 @@ function Products() {
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {products.map((product) => (
-                    <ApiProductCard key={product.id} product={product} />
+                    <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
 

@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
-import { placeOrder } from "../api/ordersApi";
-import type { CheckoutPayload } from "../api/ordersApi";
-import { ApiError } from "../api/ApiError";
+import { useCart } from "../features/cart/context/CartContext";
+import { placeOrder } from "../services/orders.service";
+import type { CheckoutPayload } from "../services/orders.service";
+import { ApiError } from "../lib/ApiError";
 
 const EMPTY_FORM: CheckoutPayload = {
   full_name: "",
@@ -19,7 +18,6 @@ const EMPTY_FORM: CheckoutPayload = {
 
 function Checkout() {
   const { cart, clearCart } = useCart();
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const [form, setForm] = useState<CheckoutPayload>(EMPTY_FORM);
@@ -27,10 +25,6 @@ function Checkout() {
     Partial<Record<keyof CheckoutPayload | "general", string>>
   >({});
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    if (!isAuthenticated) navigate("/sign-in", { replace: true });
-  }, [isAuthenticated, navigate]);
 
   useEffect(() => {
     if (cart !== null && cart.items.length === 0)

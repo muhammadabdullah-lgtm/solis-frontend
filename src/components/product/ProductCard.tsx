@@ -1,79 +1,91 @@
-import { useState } from "react";
-import { Heart, ShoppingCart } from "lucide-react";
-import type { Product } from "../../types";
+import { useNavigate } from "react-router-dom";
+import { ShoppingCart } from "lucide-react";
+import { useCart } from "../../features/cart/context/CartContext";
+import { useAuth } from "../../features/auth/context/AuthContext";
+import type { ApiProduct } from "../../services/products.service";
 
-interface ProductCardProps {
-  product: Product;
-  addToCart: (productId: number) => void;
-}
+function ProductCard({ product }: { product: ApiProduct }) {
+  const { addToCart } = useCart();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-function ProductCard({ product, addToCart }: ProductCardProps) {
-  const [wishlisted, setWishlisted] = useState(false);
+  const discount =
+    product.compare_at_price !== null
+      ? Math.round(
+          (1 - Number(product.price) / Number(product.compare_at_price)) * 100,
+        )
+      : null;
+
+  const handleAddToCart = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isAuthenticated) {
+      navigate("/sign-in");
+      return;
+    }
+    await addToCart(product.id);
+  };
 
   return (
-    <div className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 group flex flex-col">
-      <div className="relative overflow-hidden rounded-t-xl">
-        {product.badge && (
-          <span className="absolute top-2 left-2 z-10 bg-[#feee00] text-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
-            {product.badge}
+    <div
+      onClick={() => navigate(`/product/${product.id}`)}
+      className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer flex flex-col relative overflow-hidden"
+    >
+      {!product.in_stock && (
+        <div className="absolute inset-0 bg-white/70 z-10 flex items-center justify-center rounded-xl pointer-events-none">
+          <span className="bg-gray-200 text-gray-600 text-xs font-semibold px-3 py-1 rounded-full">
+            Out of Stock
           </span>
-        )}
+        </div>
+      )}
+      {discount !== null && (
+        <span className="absolute top-2 left-2 z-10 bg-[#feee00] text-black text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">
+          -{discount}%
+        </span>
+      )}
 
-        <button
-          onClick={() => setWishlisted((w) => !w)}
-          className="absolute top-2 right-2 z-10 bg-white/80 backdrop-blur-sm rounded-full p-1.5 hover:bg-white transition-colors"
-          aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          <Heart
-            size={14}
-            className={
-              wishlisted ? "text-red-500 fill-red-500" : "text-gray-400"
-            }
-          />
-        </button>
-
+      <div className="overflow-hidden rounded-t-xl">
         <img
-          src={product.image}
-          alt={product.title}
+          src={product.image_url}
+          alt={product.name}
           className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>
 
       <div className="p-3 flex flex-col flex-1">
+        {product.brand && (
+          <p className="text-xs text-gray-400 mb-0.5">{product.brand.name}</p>
+        )}
+
         <h3 className="text-sm font-medium text-gray-900 line-clamp-2 leading-snug flex-1">
-          {product.title}
+          {product.name}
         </h3>
 
-        {product.rating !== undefined && (
-          <div className="flex items-center gap-1 mt-1.5">
-            <StarRating rating={product.rating} />
-            {product.reviewCount !== undefined && (
-              <span className="text-xs text-gray-400">
-                ({product.reviewCount.toLocaleString()})
-              </span>
-            )}
-          </div>
-        )}
+        <div className="mt-1.5">
+          {product.average_rating !== null ? (
+            <StarRating
+              rating={product.average_rating}
+              count={product.reviews_count}
+            />
+          ) : (
+            <span className="text-xs text-gray-400">No reviews</span>
+          )}
+        </div>
 
         <div className="mt-2 flex items-baseline gap-2 flex-wrap">
           <span className="text-base font-bold text-gray-900">
-            ${product.price.toLocaleString()}
+            AED {product.price}
           </span>
-          {product.originalPrice && (
+          {product.compare_at_price !== null && (
             <span className="text-xs text-gray-400 line-through">
-              ${product.originalPrice.toLocaleString()}
-            </span>
-          )}
-          {product.discount && (
-            <span className="text-xs font-semibold text-green-600">
-              -{product.discount}%
+              AED {product.compare_at_price}
             </span>
           )}
         </div>
 
         <button
-          onClick={() => addToCart(product.id)}
-          className="mt-3 w-full flex items-center justify-center gap-2 bg-[#feee00] text-black text-sm font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity"
+          onClick={handleAddToCart}
+          disabled={!product.in_stock}
+          className="mt-3 w-full flex items-center justify-center gap-2 bg-[#feee00] text-black text-sm font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ShoppingCart size={14} />
           Add to Cart
@@ -83,27 +95,37 @@ function ProductCard({ product, addToCart }: ProductCardProps) {
   );
 }
 
-function StarRating({ rating }: { rating: number }) {
+function StarRating({ rating, count }: { rating: number; count: number }) {
   const full = Math.floor(rating);
   const half = rating - full >= 0.5;
 
   return (
-    <div className="flex items-center gap-px" aria-label={`${rating} out of 5`}>
-      {[1, 2, 3, 4, 5].map((s) => (
-        <span
-          key={s}
-          className={`text-xs leading-none ${
-            s <= full
-              ? "text-amber-400"
-              : s === full + 1 && half
-                ? "text-amber-300"
-                : "text-gray-200"
-          }`}
-        >
-          ★
+    <div className="flex items-center gap-1">
+      <div
+        className="flex items-center gap-px"
+        aria-label={`${rating} out of 5`}
+      >
+        {[1, 2, 3, 4, 5].map((s) => (
+          <span
+            key={s}
+            className={`text-xs leading-none ${
+              s <= full
+                ? "text-amber-400"
+                : s === full + 1 && half
+                  ? "text-amber-300"
+                  : "text-gray-200"
+            }`}
+          >
+            ★
+          </span>
+        ))}
+      </div>
+      <span className="text-xs text-gray-500 font-medium">{rating}</span>
+      {count > 0 && (
+        <span className="text-xs text-gray-400">
+          ({count.toLocaleString()})
         </span>
-      ))}
-      <span className="text-xs text-gray-500 ml-0.5 font-medium">{rating}</span>
+      )}
     </div>
   );
 }

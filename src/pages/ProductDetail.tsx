@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ShoppingCart, ChevronLeft, Minus, Plus } from "lucide-react";
-import { getProduct, getProductReviews } from "../api/productsApi";
+import { getProduct, getProductReviews } from "../services/products.service";
 import type {
   ApiProductDetail,
   ApiReview,
   ReviewsResponse,
-} from "../api/productsApi";
-import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
+} from "../services/products.service";
+import { useCart } from "../features/cart/context/CartContext";
+import { useAuth } from "../features/auth/context/AuthContext";
 
 function ProductDetail() {
   const { id } = useParams<{ id: string }>();

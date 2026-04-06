@@ -1,14 +1,14 @@
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import type { ReactNode } from "react";
-import { useAuth } from "./AuthContext";
+import { useAuth } from "../../auth/context/AuthContext";
 import {
   getCart,
   addCartItem,
   updateCartItem,
   removeCartItem,
   clearCartApi,
-} from "../api/cartApi";
-import type { ApiCart } from "../api/cartApi";
+} from "../../../services/cart.service";
+import type { ApiCart } from "../../../services/cart.service";
 
 interface CartContextValue {
   cart: ApiCart | null;

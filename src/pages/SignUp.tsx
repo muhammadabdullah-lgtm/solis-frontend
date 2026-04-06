@@ -3,9 +3,9 @@ import type { FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
-import { useAuth } from "../context/AuthContext";
-import { signUp as signUpApi, ApiError } from "../api/authApi";
-import { useGoogleAuth } from "../hooks/useGoogleAuth";
+import { useAuth } from "../features/auth/context/AuthContext";
+import { signUp as signUpApi, ApiError } from "../services/auth.service";
+import { useGoogleAuth } from "../features/auth/hooks/useGoogleAuth";
 
 function SignUp() {
   const [name, setName] = useState("");

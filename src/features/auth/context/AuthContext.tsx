@@ -1,7 +1,7 @@
 import { createContext, useContext, useState } from "react";
 import type { ReactNode } from "react";
-import type { ApiUser } from "../api/authApi";
-import { signOut as signOutApi } from "../api/authApi";
+import type { ApiUser } from "../../../services/auth.service";
+import { signOut as signOutApi } from "../../../services/auth.service";
 
 export interface AuthUser {
   id: number;
@@ -15,11 +15,8 @@ export interface AuthUser {
 interface AuthContextValue {
   user: AuthUser | null;
   isAuthenticated: boolean;
-
   loginUser: (apiUser: ApiUser, token?: string) => void;
-
   signIn: (email: string, password: string) => void;
-
   signInWithGoogle: () => void;
   signOut: () => Promise<void>;
 }

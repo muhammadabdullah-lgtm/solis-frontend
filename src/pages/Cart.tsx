@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import CartItemRow from "../components/cart/CartItem";
 import EmptyCart from "../components/cart/EmptyCart";
-import { useCart } from "../context/CartContext";
-import { useAuth } from "../context/AuthContext";
+import { useCart } from "../features/cart/context/CartContext";
+import { useAuth } from "../features/auth/context/AuthContext";
 
 function Cart() {
   const { cart, loading, removeFromCart, updateQuantity, clearCart } = useCart();

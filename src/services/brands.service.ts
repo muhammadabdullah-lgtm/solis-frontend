@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from "../lib/axios";
 
 export interface ApiBrand {
   id: number;
@@ -11,7 +11,6 @@ export interface BrandsResponse {
 }
 
 export async function getBrands(): Promise<BrandsResponse> {
-  const { data } =
-    await axiosInstance.get<BrandsResponse>("/api/v1/brands");
+  const { data } = await axiosInstance.get<BrandsResponse>("/api/v1/brands");
   return data;
 }

@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { getProducts } from "../../api/productsApi";
-import type { ApiProduct } from "../../api/productsApi";
-import ApiProductCard from "../product/ApiProductCard";
+import { getProducts } from "../../services/products.service";
+import type { ApiProduct } from "../../services/products.service";
+import ProductCard from "../product/ProductCard";
 import SectionError from "../ui/SectionError";
 import SectionEmpty from "../ui/SectionEmpty";
 
@@ -59,7 +59,7 @@ function NewArrivals() {
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((product) => (
-            <ApiProductCard key={product.id} product={product} />
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}

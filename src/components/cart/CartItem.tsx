@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
-import type { ApiCartItem } from "../../api/cartApi";
+import type { ApiCartItem } from "../../services/cart.service";
 
 interface Props {
   item: ApiCartItem;

@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from "../lib/axios";
 
 export interface ApiProductBrand {
   id: number;
@@ -95,7 +95,6 @@ export async function getProduct(
   const { data } = await axiosInstance.get<
     ApiProductDetail | { product: ApiProductDetail }
   >(`/api/v1/products/${idOrSlug}`);
-  // Unwrap if the API returns { product: {...} }
   return "product" in data ? data.product : data;
 }
 

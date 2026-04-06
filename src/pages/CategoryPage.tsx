@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { useCategories } from "../context/CategoriesContext";
+import { useCategories } from "../features/categories/context/CategoriesContext";
 
 function CategoryPage() {
   const { rootSlug: slug = "" } = useParams<{ rootSlug: string }>();

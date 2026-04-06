@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from "../lib/axios";
 
 export interface ApiCartProduct {
   id: number;

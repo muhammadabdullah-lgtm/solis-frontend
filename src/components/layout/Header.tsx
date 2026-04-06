@@ -11,10 +11,10 @@ import {
   ChevronDown,
   LogOut,
 } from "lucide-react";
-import { useCart } from "../../context/CartContext";
-import { useAuth } from "../../context/AuthContext";
-import { useCategories } from "../../context/CategoriesContext";
-import type { ApiCategory } from "../../api/categoriesApi";
+import { useCart } from "../../features/cart/context/CartContext";
+import { useAuth } from "../../features/auth/context/AuthContext";
+import { useCategories } from "../../features/categories/context/CategoriesContext";
+import type { ApiCategory } from "../../services/categories.service";
 import SearchBar from "./SearchBar";
 
 function Header() {

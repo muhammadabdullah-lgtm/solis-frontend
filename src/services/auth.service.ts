@@ -1,6 +1,6 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance from "../lib/axios";
 
-export { ApiError } from "./ApiError";
+export { ApiError } from "../lib/ApiError";
 
 export interface ApiUser {
   id: number;
