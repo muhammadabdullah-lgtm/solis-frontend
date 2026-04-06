@@ -1,36 +1,92 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useReducer } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { getProducts } from "../services/products.service";
 import type { ApiProduct, Pagination } from "../services/products.service";
-import { getBrands } from "../services/brands.service";
-import type { ApiBrand } from "../services/brands.service";
+import { useBrands } from "../hooks/useBrands";
 import { useCategories } from "../features/categories/context/CategoriesContext";
+import { PER_PAGE, SORT_OPTIONS } from "../lib/constants";
 import ProductCard from "../components/product/ProductCard";
 import LiveFilterSidebar from "../components/plp/LiveFilterSidebar";
 import type { LiveFilterDraft } from "../components/plp/LiveFilterSidebar";
 import SectionError from "../components/ui/SectionError";
 import SectionEmpty from "../components/ui/SectionEmpty";
 
-const SORT_OPTIONS = [
-  { value: "", label: "Recommended" },
-  { value: "newest", label: "Newest" },
-  { value: "price_asc", label: "Price: Low to High" },
-  { value: "price_desc", label: "Price: High to Low" },
-];
+// ─── Reducer ──────────────────────────────────────────────────────────────────
 
-const PER_PAGE = 12;
+type ProductsState = {
+  // pending filter values — committed to URL on apply/search
+  draft: LiveFilterDraft;
+  query: string;
+  sort: string;
+  sidebarOpen: boolean;
+  // fetch state
+  products: ApiProduct[];
+  pagination: Pagination | null;
+  loading: boolean;
+  error: boolean;
+};
+
+type ProductsAction =
+  | { type: "SYNC_FROM_URL"; params: URLSearchParams }
+  | { type: "SET_QUERY"; query: string }
+  | { type: "SET_SORT"; sort: string }
+  | { type: "PATCH_DRAFT"; patch: Partial<LiveFilterDraft> }
+  | { type: "OPEN_SIDEBAR" }
+  | { type: "CLOSE_SIDEBAR" }
+  | { type: "FETCH_START" }
+  | { type: "FETCH_SUCCESS"; products: ApiProduct[]; pagination: Pagination }
+  | { type: "FETCH_ERROR" };
 
 function draftFromParams(params: URLSearchParams): LiveFilterDraft {
   return {
-    categoryId: params.get("category_id")
-      ? Number(params.get("category_id"))
-      : null,
+    categoryId: params.get("category_id") ? Number(params.get("category_id")) : null,
     brandIds: params.getAll("brand_id").map(Number).filter(Boolean),
     minPrice: params.get("min_price") ?? "",
     maxPrice: params.get("max_price") ?? "",
     minRating: params.get("min_rating") ? Number(params.get("min_rating")) : null,
   };
+}
+
+function initialState(params: URLSearchParams): ProductsState {
+  return {
+    draft: draftFromParams(params),
+    query: params.get("q") ?? "",
+    sort: params.get("sort") ?? "",
+    sidebarOpen: false,
+    products: [],
+    pagination: null,
+    loading: true,
+    error: false,
+  };
+}
+
+function reducer(state: ProductsState, action: ProductsAction): ProductsState {
+  switch (action.type) {
+    case "SYNC_FROM_URL":
+      return {
+        ...state,
+        draft: draftFromParams(action.params),
+        query: action.params.get("q") ?? "",
+        sort: action.params.get("sort") ?? "",
+      };
+    case "SET_QUERY":
+      return { ...state, query: action.query };
+    case "SET_SORT":
+      return { ...state, sort: action.sort };
+    case "PATCH_DRAFT":
+      return { ...state, draft: { ...state.draft, ...action.patch } };
+    case "OPEN_SIDEBAR":
+      return { ...state, sidebarOpen: true };
+    case "CLOSE_SIDEBAR":
+      return { ...state, sidebarOpen: false };
+    case "FETCH_START":
+      return { ...state, loading: true, error: false };
+    case "FETCH_SUCCESS":
+      return { ...state, products: action.products, pagination: action.pagination, loading: false };
+    case "FETCH_ERROR":
+      return { ...state, loading: false, error: true };
+  }
 }
 
 // ─── Pagination ───────────────────────────────────────────────────────────────
@@ -113,36 +169,19 @@ function PaginationBar({
 function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
   const { categories } = useCategories();
-
-  const [draft, setDraft] = useState<LiveFilterDraft>(() =>
-    draftFromParams(searchParams),
-  );
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
-  const [sort, setSort] = useState(searchParams.get("sort") ?? "");
+  const { brands } = useBrands();
   const queryInputRef = useRef<HTMLInputElement>(null);
 
-  const [brands, setBrands] = useState<ApiBrand[]>([]);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const [products, setProducts] = useState<ApiProduct[]>([]);
-  const [pagination, setPagination] = useState<Pagination | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const [state, dispatch] = useReducer(reducer, searchParams, initialState);
+  const { draft, query, sort, sidebarOpen, products, pagination, loading, error } = state;
 
   const currentPage = Number(searchParams.get("page") ?? "1");
 
-  useEffect(() => {
-    getBrands()
-      .then(({ brands }) => setBrands(brands))
-      .catch(() => {});
-  }, []);
-
+  // ── Fetch ──
   const fetchProducts = useCallback(() => {
-    setLoading(true);
-    setError(false);
+    dispatch({ type: "FETCH_START" });
 
     const brandIds = searchParams.getAll("brand_id").map(Number).filter(Boolean);
-
     const params = {
       category_id: searchParams.get("category_id")
         ? Number(searchParams.get("category_id"))
@@ -150,15 +189,9 @@ function Products() {
       brand_id: brandIds.length > 0
         ? (brandIds.length === 1 ? brandIds[0] : brandIds)
         : undefined,
-      min_price: searchParams.get("min_price")
-        ? Number(searchParams.get("min_price"))
-        : undefined,
-      max_price: searchParams.get("max_price")
-        ? Number(searchParams.get("max_price"))
-        : undefined,
-      min_rating: searchParams.get("min_rating")
-        ? Number(searchParams.get("min_rating"))
-        : undefined,
+      min_price: searchParams.get("min_price") ? Number(searchParams.get("min_price")) : undefined,
+      max_price: searchParams.get("max_price") ? Number(searchParams.get("max_price")) : undefined,
+      min_rating: searchParams.get("min_rating") ? Number(searchParams.get("min_rating")) : undefined,
       q: searchParams.get("q") ?? undefined,
       sort: searchParams.get("sort") ?? undefined,
       page: currentPage,
@@ -166,24 +199,22 @@ function Products() {
     };
 
     getProducts(params)
-      .then(({ products, pagination }) => {
-        setProducts(products);
-        setPagination(pagination);
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      .then(({ products, pagination }) =>
+        dispatch({ type: "FETCH_SUCCESS", products, pagination }),
+      )
+      .catch(() => dispatch({ type: "FETCH_ERROR" }));
   }, [searchParams]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
+  // Keep pending filter inputs in sync when URL changes externally (back/forward)
   useEffect(() => {
-    setDraft(draftFromParams(searchParams));
-    setQuery(searchParams.get("q") ?? "");
-    setSort(searchParams.get("sort") ?? "");
+    dispatch({ type: "SYNC_FROM_URL", params: searchParams });
   }, [searchParams]);
 
+  // ── URL helpers ──
   const handlePageChange = (page: number) => {
     const next = new URLSearchParams(searchParams);
     if (page === 1) next.delete("page");
@@ -192,14 +223,11 @@ function Products() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Brand toggle applies immediately to the URL
   const handleBrandToggle = (id: number) => {
     const current = searchParams.getAll("brand_id").map(Number).filter(Boolean);
     const next = new URLSearchParams(searchParams);
     next.delete("brand_id");
-    const updated = current.includes(id)
-      ? current.filter((b) => b !== id)
-      : [...current, id];
+    const updated = current.includes(id) ? current.filter((b) => b !== id) : [...current, id];
     updated.forEach((b) => next.append("brand_id", String(b)));
     next.delete("page");
     setSearchParams(next);
@@ -225,18 +253,21 @@ function Products() {
     else next.delete("sort");
     next.delete("page");
     setSearchParams(next);
-    setSidebarOpen(false);
+    dispatch({ type: "CLOSE_SIDEBAR" });
   };
 
   const clearAll = () => {
-    setDraft({ categoryId: null, brandIds: [], minPrice: "", maxPrice: "", minRating: null });
-    setQuery("");
-    setSort("");
+    dispatch({
+      type: "PATCH_DRAFT",
+      patch: { categoryId: null, brandIds: [], minPrice: "", maxPrice: "", minRating: null },
+    });
+    dispatch({ type: "SET_QUERY", query: "" });
+    dispatch({ type: "SET_SORT", sort: "" });
     setSearchParams(new URLSearchParams());
   };
 
   const handleSortChange = (value: string) => {
-    setSort(value);
+    dispatch({ type: "SET_SORT", sort: value });
     const next = new URLSearchParams(searchParams);
     if (value) next.set("sort", value);
     else next.delete("sort");
@@ -280,17 +311,14 @@ function Products() {
   draft.brandIds.forEach((bid) => {
     const brand = brands.find((b) => b.id === bid);
     if (brand) {
-      activeChips.push({
-        label: brand.name,
-        onRemove: () => handleBrandToggle(bid),
-      });
+      activeChips.push({ label: brand.name, onRemove: () => handleBrandToggle(bid) });
     }
   });
   if (draft.minPrice || draft.maxPrice) {
     activeChips.push({
       label: `AED ${draft.minPrice || "0"} – ${draft.maxPrice || "∞"}`,
       onRemove: () => {
-        setDraft({ ...draft, minPrice: "", maxPrice: "" });
+        dispatch({ type: "PATCH_DRAFT", patch: { minPrice: "", maxPrice: "" } });
         const next = new URLSearchParams(searchParams);
         next.delete("min_price");
         next.delete("max_price");
@@ -319,9 +347,7 @@ function Products() {
         setSearchParams(next);
       }}
       onBrandToggle={handleBrandToggle}
-      onPriceChange={(field, value) =>
-        setDraft((d) => ({ ...d, [field]: value }))
-      }
+      onPriceChange={(field, value) => dispatch({ type: "PATCH_DRAFT", patch: { [field]: value } })}
       onRatingSelect={handleRatingSelect}
       onApply={applyFilters}
       onClearAll={clearAll}
@@ -348,14 +374,14 @@ function Products() {
                   type="text"
                   placeholder="Search products…"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => dispatch({ type: "SET_QUERY", query: e.target.value })}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
                   className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white outline-none focus:border-[#feee00] focus:ring-2 focus:ring-[#feee00]/30 transition"
                 />
                 {query && (
                   <button
                     onClick={() => {
-                      setQuery("");
+                      dispatch({ type: "SET_QUERY", query: "" });
                       const next = new URLSearchParams(searchParams);
                       next.delete("q");
                       next.delete("page");
@@ -381,7 +407,7 @@ function Products() {
               </select>
 
               <button
-                onClick={() => setSidebarOpen(true)}
+                onClick={() => dispatch({ type: "OPEN_SIDEBAR" })}
                 className="lg:hidden flex items-center gap-2 px-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white font-medium hover:bg-gray-50 transition"
               >
                 <SlidersHorizontal size={15} />
@@ -397,10 +423,7 @@ function Products() {
                     className="flex items-center gap-1.5 bg-white border border-gray-200 rounded-full px-3 py-1 text-xs font-medium text-gray-700"
                   >
                     {chip.label}
-                    <button
-                      onClick={chip.onRemove}
-                      className="text-gray-400 hover:text-gray-700"
-                    >
+                    <button onClick={chip.onRemove} className="text-gray-400 hover:text-gray-700">
                       <X size={11} />
                     </button>
                   </span>
@@ -418,19 +441,13 @@ function Products() {
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {Array.from({ length: PER_PAGE }).map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-white rounded-xl border border-gray-100 h-72 animate-pulse"
-                  />
+                  <div key={i} className="bg-white rounded-xl border border-gray-100 h-72 animate-pulse" />
                 ))}
               </div>
             ) : error ? (
               <SectionError onRetry={fetchProducts} />
             ) : products.length === 0 ? (
-              <SectionEmpty
-                icon="🔍"
-                message="No products found. Try adjusting your filters."
-              />
+              <SectionEmpty icon="🔍" message="No products found. Try adjusting your filters." />
             ) : (
               <>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -440,10 +457,7 @@ function Products() {
                 </div>
 
                 {pagination && (
-                  <PaginationBar
-                    pagination={pagination}
-                    onPageChange={handlePageChange}
-                  />
+                  <PaginationBar pagination={pagination} onPageChange={handlePageChange} />
                 )}
               </>
             )}
@@ -453,14 +467,11 @@ function Products() {
 
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div
-            className="flex-1 bg-black/40"
-            onClick={() => setSidebarOpen(false)}
-          />
+          <div className="flex-1 bg-black/40" onClick={() => dispatch({ type: "CLOSE_SIDEBAR" })} />
           <div className="w-72 bg-gray-50 h-full overflow-y-auto p-4 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-gray-900">Filters</h2>
-              <button onClick={() => setSidebarOpen(false)}>
+              <button onClick={() => dispatch({ type: "CLOSE_SIDEBAR" })}>
                 <X size={20} className="text-gray-500" />
               </button>
             </div>

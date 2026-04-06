@@ -1,14 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ShoppingCart, ChevronLeft, Minus, Plus } from "lucide-react";
-import { getProduct, getProductReviews } from "../services/products.service";
-import type {
-  ApiProductDetail,
-  ApiReview,
-  ReviewsResponse,
-} from "../services/products.service";
+import type { ApiReview, ReviewsResponse } from "../services/products.service";
 import { useCart } from "../features/cart/context/CartContext";
 import { useAuth } from "../features/auth/context/AuthContext";
+import { useProduct } from "../hooks/useProduct";
 
 function ProductDetail() {
   const { id } = useParams<{ id: string }>();
@@ -16,35 +12,10 @@ function ProductDetail() {
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
 
-  const [product, setProduct] = useState<ApiProductDetail | null>(null);
-  const [reviews, setReviews] = useState<ReviewsResponse | null>(null);
-  const [productLoading, setProductLoading] = useState(true);
-  const [productError, setProductError] = useState(false);
+  const { product, reviews, loading: productLoading, error: productError } = useProduct(id);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [addedFeedback, setAddedFeedback] = useState(false);
-
-  useEffect(() => {
-    if (!id) return;
-    setProductLoading(true);
-    setProductError(false);
-    getProduct(id)
-      .then((p) => {
-        // Guard: if the response is malformed (missing id), treat as error
-        if (!p || !p.id) {
-          setProductError(true);
-          return;
-        }
-        setProduct(p);
-        setQuantity(1);
-
-        getProductReviews(p.id)
-          .then((r) => setReviews(r))
-          .catch(() => setReviews(null));
-      })
-      .catch(() => setProductError(true))
-      .finally(() => setProductLoading(false));
-  }, [id]);
 
   if (productLoading) {
     return (

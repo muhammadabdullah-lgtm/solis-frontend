@@ -1,28 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { getBrands } from "../../services/brands.service";
-import type { ApiBrand } from "../../services/brands.service";
+import { useBrands } from "../../hooks/useBrands";
 import SectionError from "../ui/SectionError";
 import SectionEmpty from "../ui/SectionEmpty";
 
 function TopBrands() {
-  const [brands, setBrands] = useState<ApiBrand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const navigate = useNavigate();
-
-  const fetch = useCallback(() => {
-    setLoading(true);
-    setError(false);
-    getBrands()
-      .then(({ brands }) => setBrands(brands))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
+  const { brands, loading, error, retry } = useBrands();
 
   if (loading) return null;
 
@@ -34,7 +17,7 @@ function TopBrands() {
       </div>
 
       {error ? (
-        <SectionError onRetry={fetch} />
+        <SectionError onRetry={retry} />
       ) : brands.length === 0 ? (
         <SectionEmpty icon="🏷️" message="No brands available right now." />
       ) : (

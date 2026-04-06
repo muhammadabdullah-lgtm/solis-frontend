@@ -1,18 +1,28 @@
+import { lazy, Suspense } from "react";
 import { useLocation, Route, Routes } from "react-router-dom";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
-import Home from "../pages/Home";
-import Cart from "../pages/Cart";
-import SignIn from "../pages/SignIn";
-import SignUp from "../pages/SignUp";
-import Products from "../pages/Products";
-import ProductDetail from "../pages/ProductDetail";
-import Checkout from "../pages/Checkout";
-import Orders from "../pages/Orders";
-import OrderDetail from "../pages/OrderDetail";
-import CategoryPage from "../pages/CategoryPage";
 import ProtectedRoute from "./ProtectedRoute";
 import { AUTH_ROUTES } from "../lib/constants";
+
+const Home = lazy(() => import("../pages/Home"));
+const Cart = lazy(() => import("../pages/Cart"));
+const SignIn = lazy(() => import("../pages/SignIn"));
+const SignUp = lazy(() => import("../pages/SignUp"));
+const Products = lazy(() => import("../pages/Products"));
+const ProductDetail = lazy(() => import("../pages/ProductDetail"));
+const Checkout = lazy(() => import("../pages/Checkout"));
+const Orders = lazy(() => import("../pages/Orders"));
+const OrderDetail = lazy(() => import("../pages/OrderDetail"));
+const CategoryPage = lazy(() => import("../pages/CategoryPage"));
+
+function PageLoader() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-[#feee00] animate-spin" />
+    </div>
+  );
+}
 
 function AppRoutes() {
   const { pathname } = useLocation();
@@ -22,19 +32,21 @@ function AppRoutes() {
     <>
       {!isAuthPage && <Header />}
 
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/cart" element={<Cart />} />
-        <Route path="/sign-in" element={<SignIn />} />
-        <Route path="/sign-up" element={<SignUp />} />
-        <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/products" element={<Products />} />
-        <Route path="/products/:rootSlug" element={<CategoryPage />} />
-        <Route path="/products/:rootSlug/:subSlug" element={<Products />} />
-        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
-        <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
-        <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
-      </Routes>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/cart" element={<Cart />} />
+          <Route path="/sign-in" element={<SignIn />} />
+          <Route path="/sign-up" element={<SignUp />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/products/:rootSlug" element={<CategoryPage />} />
+          <Route path="/products/:rootSlug/:subSlug" element={<Products />} />
+          <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
+          <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
+          <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+        </Routes>
+      </Suspense>
 
       {!isAuthPage && <Footer />}
     </>

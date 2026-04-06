@@ -1,30 +1,13 @@
-import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { getProducts } from "../../services/products.service";
-import type { ApiProduct } from "../../services/products.service";
+import { useProducts } from "../../hooks/useProducts";
 import ProductCard from "../product/ProductCard";
 import SectionError from "../ui/SectionError";
 import SectionEmpty from "../ui/SectionEmpty";
 
 function NewArrivals() {
-  const [products, setProducts] = useState<ApiProduct[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const navigate = useNavigate();
-
-  const fetch = useCallback(() => {
-    setLoading(true);
-    setError(false);
-    getProducts({ sort: "newest", per_page: 8 })
-      .then(({ products }) => setProducts(products.slice(0, 8)))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    fetch();
-  }, [fetch]);
+  const { products, loading, error, retry } = useProducts({ sort: "newest", per_page: 8 });
 
   return (
     <section>
@@ -53,7 +36,7 @@ function NewArrivals() {
           ))}
         </div>
       ) : error ? (
-        <SectionError onRetry={fetch} />
+        <SectionError onRetry={retry} />
       ) : products.length === 0 ? (
         <SectionEmpty icon="📦" message="No new arrivals yet. Check back soon!" />
       ) : (

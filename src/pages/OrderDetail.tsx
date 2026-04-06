@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ChevronLeft, MapPin, Star, X } from "lucide-react";
-import { getOrder } from "../services/orders.service";
-import type { OrderDetail as IOrderDetail, OrderItem } from "../services/orders.service";
+import type { OrderItem } from "../services/orders.service";
 import { createReview } from "../services/products.service";
+import { useOrderDetail } from "../hooks/useOrderDetail";
 import { StatusBadge } from "./Orders";
 
 // ─── Review Modal ─────────────────────────────────────────────────────────────
@@ -136,21 +136,9 @@ function OrderDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const [order, setOrder] = useState<IOrderDetail | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
+  const { order, loading, error } = useOrderDetail(id);
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
   const [reviewedItemIds, setReviewedItemIds] = useState<Set<number>>(new Set());
-
-  useEffect(() => {
-    if (!id) return;
-    setLoading(true);
-    setError(false);
-    getOrder(Number(id))
-      .then((data) => setOrder(data))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  }, [id]);
 
   const handleReviewSubmitted = (itemId: number) => {
     setReviewedItemIds((prev) => new Set(prev).add(itemId));

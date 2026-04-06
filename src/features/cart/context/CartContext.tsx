@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "../../auth/context/AuthContext";
 import {
@@ -47,32 +53,105 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, [isAuthenticated, fetchCart]);
 
+  const optimistic = async (
+    updater: (prev: ApiCart) => ApiCart,
+    apiCall: () => Promise<unknown>,
+  ) => {
+    if (!cart) return;
+
+    const snapshot = cart;
+    setCart(updater(cart));
+
+    try {
+      await apiCall();
+      const fresh = await getCart();
+      setCart(fresh);
+    } catch {
+      setCart(snapshot); // roll back on failure
+    }
+  };
+
   const addToCart = async (productId: number, quantity = 1) => {
-    await addCartItem(productId, quantity);
-    await fetchCart();
+    if (!cart) return;
+
+    await optimistic(
+      (prev) => ({ ...prev, total_items: prev.total_items + quantity }),
+      () => addCartItem(productId, quantity),
+    );
   };
 
   const removeFromCart = async (itemId: number) => {
-    await removeCartItem(itemId);
-    await fetchCart();
+    if (!cart) return;
+
+    const removedItem = cart.items.find((i) => i.id === itemId);
+    if (!removedItem) return;
+
+    await optimistic(
+      (prev) => ({
+        ...prev,
+        items: prev.items.filter((i) => i.id !== itemId),
+        total_items: prev.total_items - removedItem.quantity,
+        total_price: (
+          Number(prev.total_price) -
+          Number(removedItem.unit_price) * removedItem.quantity
+        ).toFixed(2),
+      }),
+      () => removeCartItem(itemId),
+    );
   };
 
   const updateQuantity = async (itemId: number, quantity: number) => {
-    if (quantity < 1) return;
-    await updateCartItem(itemId, quantity);
-    await fetchCart();
+    if (quantity < 1 || !cart) return;
+
+    const item = cart.items.find((i) => i.id === itemId);
+    if (!item) return;
+
+    const qtyDiff = quantity - item.quantity;
+
+    await optimistic(
+      (prev) => ({
+        ...prev,
+        items: prev.items.map((i) =>
+          i.id === itemId
+            ? {
+                ...i,
+                quantity,
+                subtotal: (Number(i.unit_price) * quantity).toFixed(2),
+              }
+            : i,
+        ),
+        total_items: prev.total_items + qtyDiff,
+        total_price: (
+          Number(prev.total_price) +
+          Number(item.unit_price) * qtyDiff
+        ).toFixed(2),
+      }),
+      () => updateCartItem(itemId, quantity),
+    );
   };
 
   const clearCart = async () => {
-    await clearCartApi();
-    await fetchCart();
+    if (!cart) return;
+
+    await optimistic(
+      (prev) => ({ ...prev, items: [], total_items: 0, total_price: "0.00" }),
+      () => clearCartApi(),
+    );
   };
 
   const cartCount = cart?.total_items ?? 0;
 
   return (
     <CartContext.Provider
-      value={{ cart, cartCount, loading, addToCart, removeFromCart, updateQuantity, clearCart }}
+      value={{
+        cart,
+        cartCount,
+        loading,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+      }}
     >
       {children}
     </CartContext.Provider>

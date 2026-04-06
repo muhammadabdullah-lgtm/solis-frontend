@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { getOrders } from "../services/orders.service";
-import type { OrderSummary, OrderStatus } from "../services/orders.service";
+import type { OrderStatus } from "../services/orders.service";
+import { useOrders } from "../hooks/useOrders";
 import SectionError from "../components/ui/SectionError";
 import SectionEmpty from "../components/ui/SectionEmpty";
 
@@ -14,22 +13,7 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
 };
 
 function Orders() {
-  const [orders, setOrders] = useState<OrderSummary[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    fetchOrders();
-  }, []);
-
-  const fetchOrders = () => {
-    setLoading(true);
-    setError(false);
-    getOrders()
-      .then((data) => setOrders(data))
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
-  };
+  const { orders, loading, error, retry } = useOrders();
 
   return (
     <div className="bg-gray-50 min-h-screen">
@@ -43,7 +27,7 @@ function Orders() {
             ))}
           </div>
         ) : error ? (
-          <SectionError onRetry={fetchOrders} />
+          <SectionError onRetry={retry} />
         ) : orders.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
             <SectionEmpty icon="📦" message="You haven't placed any orders yet." />
