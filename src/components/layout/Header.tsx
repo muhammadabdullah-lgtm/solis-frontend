@@ -31,23 +31,46 @@ function Header() {
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
 
-  const activeCategoryId = new URLSearchParams(search).get("category_id")
-    ? Number(new URLSearchParams(search).get("category_id"))
-    : null;
+
+  const catById = new Map(categories.map((c) => [c.id, c]));
+
+  const rootSlugById = new Map<number, string>();
+
+  const subSlugById = new Map<number, string>();
+  for (const cat of categories) {
+    for (const sub of cat.subcategories ?? []) {
+      rootSlugById.set(sub.id, cat.slug);
+      subSlugById.set(sub.id, sub.slug);
+      for (const leaf of sub.subcategories ?? []) {
+        rootSlugById.set(leaf.id, cat.slug);
+        subSlugById.set(leaf.id, sub.slug);
+      }
+    }
+  }
 
   const isActiveCat = (catId: number | null) => {
-    if (catId === null)
-      return (
-        pathname === "/" || (pathname === "/products" && !activeCategoryId)
-      );
-    return activeCategoryId === catId;
+    if (catId === null) return pathname === "/";
+    const cat = catById.get(catId);
+    if (!cat) return false;
+    return pathname.startsWith(`/products/${cat.slug}`);
   };
 
   const handleCategoryClick = (catId: number | null) => {
     if (catId === null) {
       navigate("/");
     } else {
-      navigate(`/products?category_id=${catId}`);
+      const cat = catById.get(catId);
+      if (cat) {
+
+        navigate(`/products/${cat.slug}`);
+      } else {
+
+        const rootSlug = rootSlugById.get(catId);
+        const subSlug = subSlugById.get(catId);
+        if (rootSlug && subSlug) {
+          navigate(`/products/${rootSlug}/${subSlug}?category_id=${catId}`);
+        }
+      }
     }
     setHoveredCategoryId(null);
     setDrawerOpen(false);
@@ -82,7 +105,7 @@ function Header() {
               onClick={() => navigate("/")}
               className="text-2xl font-black text-black tracking-tight shrink-0 hover:opacity-75 transition-opacity"
             >
-              solis
+             solis
             </button>
 
             <button className="flex items-center gap-1 text-xs font-semibold text-black shrink-0 hover:opacity-75 transition-opacity whitespace-nowrap">
@@ -186,7 +209,7 @@ function Header() {
             style={{ scrollbarWidth: "none" }}
           >
             {/* All */}
-            <button
+            {/* <button
               onClick={() => handleCategoryClick(null)}
               className={`whitespace-nowrap text-sm px-3 py-1.5 rounded-full font-medium shrink-0 transition-colors ${
                 isActiveCat(null)
@@ -195,7 +218,7 @@ function Header() {
               }`}
             >
               All
-            </button>
+            </button> */}
 
             {categories.map((cat) => (
               <button
@@ -327,7 +350,7 @@ function MegaMenu({
   );
 }
 
-/* ── Shared sub-components ── */
+
 function NavAction({
   icon,
   label,

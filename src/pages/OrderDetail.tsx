@@ -260,7 +260,7 @@ function OrderDetail() {
                 const reviewed = reviewedItemIds.has(item.id);
                 return (
                   <div key={item.id} className="flex gap-4 items-start">
-                    <Link to={`/products/${item.product.id}`}>
+                    <Link to={`/product/${item.product.id}`}>
                       <img
                         src={item.product_image_url}
                         alt={item.product_name}
@@ -269,7 +269,7 @@ function OrderDetail() {
                     </Link>
                     <div className="flex-1 min-w-0">
                       <Link
-                        to={`/products/${item.product.id}`}
+                        to={`/product/${item.product.id}`}
                         className="text-sm font-semibold text-gray-900 hover:text-black line-clamp-2"
                       >
                         {item.product_name}
