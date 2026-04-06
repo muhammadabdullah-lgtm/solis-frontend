@@ -22,14 +22,18 @@ export interface SignUpPayload {
 export interface SignUpResponse {
   message: string;
   user: ApiUser;
+  token?: string;
 }
 
 export async function signUp(payload: SignUpPayload): Promise<SignUpResponse> {
-  const { data } = await axiosInstance.post<SignUpResponse>(
+  const response = await axiosInstance.post<SignUpResponse>(
     "/api/v1/auth/sign_up",
     payload,
   );
-  return data;
+  const authHeader: string | undefined =
+    response.headers["authorization"] ?? response.headers["Authorization"];
+  const token = authHeader?.replace(/^Bearer\s+/i, "") || undefined;
+  return { ...response.data, token };
 }
 
 export interface SignInPayload {
@@ -42,14 +46,18 @@ export interface SignInPayload {
 export interface SignInResponse {
   message: string;
   user: ApiUser;
+  token?: string;
 }
 
 export async function signIn(payload: SignInPayload): Promise<SignInResponse> {
-  const { data } = await axiosInstance.post<SignInResponse>(
+  const response = await axiosInstance.post<SignInResponse>(
     "/api/v1/auth/sign_in",
     payload,
   );
-  return data;
+  const authHeader: string | undefined =
+    response.headers["authorization"] ?? response.headers["Authorization"];
+  const token = authHeader?.replace(/^Bearer\s+/i, "") || undefined;
+  return { ...response.data, token };
 }
 
 export interface GoogleAuthPayload {

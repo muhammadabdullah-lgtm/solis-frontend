@@ -50,7 +50,7 @@ function SignUp() {
 
     setLoading(true);
     try {
-      const { user } = await signUpApi({
+      const { user, token } = await signUpApi({
         user: {
           full_name: name.trim(),
           email: email.trim(),
@@ -58,7 +58,7 @@ function SignUp() {
           password_confirmation: confirmPassword,
         },
       });
-      loginUser(user);
+      loginUser(user, token);
       navigate("/");
     } catch (err) {
       if (err instanceof ApiError) {

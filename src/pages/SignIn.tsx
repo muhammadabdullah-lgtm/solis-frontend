@@ -33,10 +33,10 @@ function SignIn() {
 
     setLoading(true);
     try {
-      const { user } = await signInApi({
+      const { user, token } = await signInApi({
         user: { email: email.trim(), password },
       });
-      loginUser(user);
+      loginUser(user, token);
       navigate("/");
     } catch (err) {
       if (err instanceof ApiError) {

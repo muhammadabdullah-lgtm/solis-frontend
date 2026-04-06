@@ -100,7 +100,7 @@ function OrderDetail() {
             </p>
           </div>
 
-          {order.status === "pending" && (
+          {/* {order.status === "pending" && (
             <button
               onClick={handleCancel}
               disabled={cancelling}
@@ -108,7 +108,7 @@ function OrderDetail() {
             >
               {cancelling ? "Cancelling…" : "Cancel Order"}
             </button>
-          )}
+          )} */}
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
