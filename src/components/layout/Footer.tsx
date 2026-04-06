@@ -59,7 +59,7 @@ function Footer() {
     <footer className="mt-16">
       {/* ── Newsletter strip ── */}
       <div className="bg-[#feee00]">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className=" mx-auto px-4 lg:px-8 py-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <h3 className="text-xl font-black text-black">Stay in the loop</h3>
             <p className="text-sm text-black/60 mt-0.5">
@@ -89,7 +89,7 @@ function Footer() {
 
       {/* ── Main footer ── */}
       <div className="bg-[#1a1a1a] text-white">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-12">
+        <div className=" mx-auto px-4 lg:px-8 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-8">
             {/* Brand column */}
             <div className="col-span-2 md:col-span-1 lg:col-span-2">

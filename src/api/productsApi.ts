@@ -55,19 +55,25 @@ export interface ReviewsResponse {
   rating_breakdown: Record<string, number>;
 }
 
+export interface Pagination {
+  current_page: number;
+  total_pages: number;
+  total_count: number;
+  per_page: number;
+}
+
 export interface ProductsResponse {
   products: ApiProduct[];
-  total: number;
-  page: number;
-  per_page: number;
+  pagination: Pagination;
 }
 
 export interface ProductsParams {
   sort?: string;
   category_id?: number;
-  brand_id?: number;
+  brand_id?: number | number[];
   min_price?: number;
   max_price?: number;
+  min_rating?: number;
   q?: string;
   page?: number;
   per_page?: number;

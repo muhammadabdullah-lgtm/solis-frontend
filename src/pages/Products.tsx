@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { getProducts } from "../api/productsApi";
-import type { ApiProduct } from "../api/productsApi";
+import type { ApiProduct, Pagination } from "../api/productsApi";
 import { getBrands } from "../api/brandsApi";
 import type { ApiBrand } from "../api/brandsApi";
 import { useCategories } from "../context/CategoriesContext";
@@ -19,16 +19,96 @@ const SORT_OPTIONS = [
   { value: "price_desc", label: "Price: High to Low" },
 ];
 
+const PER_PAGE = 12;
+
 function draftFromParams(params: URLSearchParams): LiveFilterDraft {
   return {
     categoryId: params.get("category_id")
       ? Number(params.get("category_id"))
       : null,
-    brandIds: params.get("brand_id") ? [Number(params.get("brand_id"))] : [],
+    brandIds: params.getAll("brand_id").map(Number).filter(Boolean),
     minPrice: params.get("min_price") ?? "",
     maxPrice: params.get("max_price") ?? "",
+    minRating: params.get("min_rating") ? Number(params.get("min_rating")) : null,
   };
 }
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+function getPageNumbers(current: number, total: number): (number | null)[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | null)[] = [1];
+  if (current > 3) pages.push(null);
+  for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) {
+    pages.push(p);
+  }
+  if (current < total - 2) pages.push(null);
+  pages.push(total);
+  return pages;
+}
+
+function PaginationBar({
+  pagination,
+  onPageChange,
+}: {
+  pagination: Pagination;
+  onPageChange: (page: number) => void;
+}) {
+  const { current_page, total_pages, total_count, per_page } = pagination;
+  if (total_pages <= 1) return null;
+
+  const from = (current_page - 1) * per_page + 1;
+  const to = Math.min(current_page * per_page, total_count);
+
+  return (
+    <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <p className="text-sm text-gray-500 shrink-0">
+        Showing {from}–{to} of {total_count} products
+      </p>
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onPageChange(current_page - 1)}
+          disabled={current_page === 1}
+          className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          aria-label="Previous page"
+        >
+          <ChevronLeft size={16} />
+        </button>
+
+        {getPageNumbers(current_page, total_pages).map((p, i) =>
+          p === null ? (
+            <span key={`e-${i}`} className="w-9 h-9 flex items-center justify-center text-gray-400 text-sm">
+              …
+            </span>
+          ) : (
+            <button
+              key={p}
+              onClick={() => onPageChange(p)}
+              className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
+                p === current_page
+                  ? "bg-[#feee00] text-black border border-[#feee00]"
+                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              {p}
+            </button>
+          ),
+        )}
+
+        <button
+          onClick={() => onPageChange(current_page + 1)}
+          disabled={current_page === total_pages}
+          className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          aria-label="Next page"
+        >
+          <ChevronRight size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main page ────────────────────────────────────────────────────────────────
 
 function Products() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -37,7 +117,6 @@ function Products() {
   const [draft, setDraft] = useState<LiveFilterDraft>(() =>
     draftFromParams(searchParams),
   );
-
   const [query, setQuery] = useState(searchParams.get("q") ?? "");
   const [sort, setSort] = useState(searchParams.get("sort") ?? "");
   const queryInputRef = useRef<HTMLInputElement>(null);
@@ -46,9 +125,11 @@ function Products() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [products, setProducts] = useState<ApiProduct[]>([]);
-  const [total, setTotal] = useState(0);
+  const [pagination, setPagination] = useState<Pagination | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  const currentPage = Number(searchParams.get("page") ?? "1");
 
   useEffect(() => {
     getBrands()
@@ -60,12 +141,14 @@ function Products() {
     setLoading(true);
     setError(false);
 
+    const brandIds = searchParams.getAll("brand_id").map(Number).filter(Boolean);
+
     const params = {
       category_id: searchParams.get("category_id")
         ? Number(searchParams.get("category_id"))
         : undefined,
-      brand_id: searchParams.get("brand_id")
-        ? Number(searchParams.get("brand_id"))
+      brand_id: brandIds.length > 0
+        ? (brandIds.length === 1 ? brandIds[0] : brandIds)
         : undefined,
       min_price: searchParams.get("min_price")
         ? Number(searchParams.get("min_price"))
@@ -73,14 +156,19 @@ function Products() {
       max_price: searchParams.get("max_price")
         ? Number(searchParams.get("max_price"))
         : undefined,
+      min_rating: searchParams.get("min_rating")
+        ? Number(searchParams.get("min_rating"))
+        : undefined,
       q: searchParams.get("q") ?? undefined,
       sort: searchParams.get("sort") ?? undefined,
+      page: currentPage,
+      per_page: PER_PAGE,
     };
 
     getProducts(params)
-      .then(({ products, total }) => {
+      .then(({ products, pagination }) => {
         setProducts(products);
-        setTotal(total);
+        setPagination(pagination);
       })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
@@ -96,28 +184,52 @@ function Products() {
     setSort(searchParams.get("sort") ?? "");
   }, [searchParams]);
 
-  const applyFilters = () => {
-    // Start from current URL to preserve category_id (applied immediately on click)
+  const handlePageChange = (page: number) => {
     const next = new URLSearchParams(searchParams);
-    // Brands
+    if (page === 1) next.delete("page");
+    else next.set("page", String(page));
+    setSearchParams(next);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Brand toggle applies immediately to the URL
+  const handleBrandToggle = (id: number) => {
+    const current = searchParams.getAll("brand_id").map(Number).filter(Boolean);
+    const next = new URLSearchParams(searchParams);
     next.delete("brand_id");
-    draft.brandIds.forEach((id) => next.append("brand_id", String(id)));
-    // Price
+    const updated = current.includes(id)
+      ? current.filter((b) => b !== id)
+      : [...current, id];
+    updated.forEach((b) => next.append("brand_id", String(b)));
+    next.delete("page");
+    setSearchParams(next);
+  };
+
+  const handleRatingSelect = (rating: number | null) => {
+    const next = new URLSearchParams(searchParams);
+    if (rating !== null) next.set("min_rating", String(rating));
+    else next.delete("min_rating");
+    next.delete("page");
+    setSearchParams(next);
+  };
+
+  const applyFilters = () => {
+    const next = new URLSearchParams(searchParams);
     if (draft.minPrice) next.set("min_price", draft.minPrice);
     else next.delete("min_price");
     if (draft.maxPrice) next.set("max_price", draft.maxPrice);
     else next.delete("max_price");
-    // Preserve search + sort
     if (query) next.set("q", query);
     else next.delete("q");
     if (sort) next.set("sort", sort);
     else next.delete("sort");
+    next.delete("page");
     setSearchParams(next);
     setSidebarOpen(false);
   };
 
   const clearAll = () => {
-    setDraft({ categoryId: null, brandIds: [], minPrice: "", maxPrice: "" });
+    setDraft({ categoryId: null, brandIds: [], minPrice: "", maxPrice: "", minRating: null });
     setQuery("");
     setSort("");
     setSearchParams(new URLSearchParams());
@@ -128,6 +240,7 @@ function Products() {
     const next = new URLSearchParams(searchParams);
     if (value) next.set("sort", value);
     else next.delete("sort");
+    next.delete("page");
     setSearchParams(next);
   };
 
@@ -135,9 +248,11 @@ function Products() {
     const next = new URLSearchParams(searchParams);
     if (query) next.set("q", query);
     else next.delete("q");
+    next.delete("page");
     setSearchParams(next);
   };
 
+  // ── Active filter chips ──
   const activeChips: { label: string; onRemove: () => void }[] = [];
   if (draft.categoryId) {
     const findName = (id: number): string => {
@@ -155,10 +270,9 @@ function Products() {
     activeChips.push({
       label: findName(draft.categoryId),
       onRemove: () => {
-        const d = { ...draft, categoryId: null };
-        setDraft(d);
         const next = new URLSearchParams(searchParams);
         next.delete("category_id");
+        next.delete("page");
         setSearchParams(next);
       },
     });
@@ -168,16 +282,7 @@ function Products() {
     if (brand) {
       activeChips.push({
         label: brand.name,
-        onRemove: () => {
-          const d = {
-            ...draft,
-            brandIds: draft.brandIds.filter((id) => id !== bid),
-          };
-          setDraft(d);
-          const next = new URLSearchParams(searchParams);
-          next.delete("brand_id");
-          setSearchParams(next);
-        },
+        onRemove: () => handleBrandToggle(bid),
       });
     }
   });
@@ -189,8 +294,15 @@ function Products() {
         const next = new URLSearchParams(searchParams);
         next.delete("min_price");
         next.delete("max_price");
+        next.delete("page");
         setSearchParams(next);
       },
+    });
+  }
+  if (draft.minRating !== null) {
+    activeChips.push({
+      label: `${"★".repeat(draft.minRating)} & up`,
+      onRemove: () => handleRatingSelect(null),
     });
   }
 
@@ -200,27 +312,17 @@ function Products() {
       brands={brands}
       draft={draft}
       onCategorySelect={(id) => {
-          // Category applies immediately — no need to click Apply
-          const next = new URLSearchParams(searchParams);
-          if (id === null) {
-            next.delete("category_id");
-          } else {
-            next.set("category_id", String(id));
-          }
-          setSearchParams(next);
-          // draft is synced from URL params by the existing useEffect
-        }}
-      onBrandToggle={(id) =>
-        setDraft((d) => ({
-          ...d,
-          brandIds: d.brandIds.includes(id)
-            ? d.brandIds.filter((b) => b !== id)
-            : [...d.brandIds, id],
-        }))
-      }
+        const next = new URLSearchParams(searchParams);
+        if (id === null) next.delete("category_id");
+        else next.set("category_id", String(id));
+        next.delete("page");
+        setSearchParams(next);
+      }}
+      onBrandToggle={handleBrandToggle}
       onPriceChange={(field, value) =>
         setDraft((d) => ({ ...d, [field]: value }))
       }
+      onRatingSelect={handleRatingSelect}
       onApply={applyFilters}
       onClearAll={clearAll}
     />
@@ -256,6 +358,7 @@ function Products() {
                       setQuery("");
                       const next = new URLSearchParams(searchParams);
                       next.delete("q");
+                      next.delete("page");
                       setSearchParams(next);
                     }}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
@@ -285,6 +388,7 @@ function Products() {
                 Filters
               </button>
             </div>
+
             {activeChips.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-4">
                 {activeChips.map((chip) => (
@@ -303,14 +407,17 @@ function Products() {
                 ))}
               </div>
             )}
-            {!loading && !error && (
+
+            {!loading && !error && pagination && (
               <p className="text-sm text-gray-500 mb-4">
-                {total} {total === 1 ? "product" : "products"} found
+                {pagination.total_count}{" "}
+                {pagination.total_count === 1 ? "product" : "products"} found
               </p>
             )}
+
             {loading ? (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {Array.from({ length: 8 }).map((_, i) => (
+                {Array.from({ length: PER_PAGE }).map((_, i) => (
                   <div
                     key={i}
                     className="bg-white rounded-xl border border-gray-100 h-72 animate-pulse"
@@ -325,11 +432,20 @@ function Products() {
                 message="No products found. Try adjusting your filters."
               />
             ) : (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {products.map((product) => (
-                  <ApiProductCard key={product.id} product={product} />
-                ))}
-              </div>
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {products.map((product) => (
+                    <ApiProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+
+                {pagination && (
+                  <PaginationBar
+                    pagination={pagination}
+                    onPageChange={handlePageChange}
+                  />
+                )}
+              </>
             )}
           </div>
         </div>
