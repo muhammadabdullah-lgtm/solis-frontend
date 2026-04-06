@@ -144,11 +144,7 @@ function Header() {
                 </div>
               )}
 
-              <NavAction
-                icon={<Heart size={20} />}
-                label="Wishlist"
-                onClick={() => {}}
-              />
+              
               <CartButton count={cartCount} onClick={() => navigate("/cart")} />
             </div>
           </div>

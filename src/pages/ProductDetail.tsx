@@ -141,9 +141,9 @@ function ProductDetail() {
             </h1>
 
             <div>
-              {product.average_rating !== null ? (
+              {product.average_rating != null ? (
                 <StarRow
-                  rating={product.average_rating}
+                  rating={Number(product.average_rating)}
                   count={product.reviews_count}
                 />
               ) : (
@@ -262,7 +262,12 @@ function ReviewsSection({ reviews }: { reviews: ReviewsResponse | null }) {
     );
   }
 
-  if (reviews.total === 0) {
+  const reviewList = Array.isArray(reviews.reviews) ? reviews.reviews : [];
+  const total = reviews.total ?? reviewList.length;
+  const avgRating =
+    reviews.average_rating != null ? Number(reviews.average_rating) : null;
+
+  if (total === 0 && reviewList.length === 0) {
     return (
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6 text-center">
         <p className="text-3xl mb-2">💬</p>
@@ -273,23 +278,22 @@ function ReviewsSection({ reviews }: { reviews: ReviewsResponse | null }) {
 
   return (
     <div className="space-y-4">
-      {reviews.average_rating !== null && (
+      {avgRating !== null && !isNaN(avgRating) && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
           <div className="flex items-center gap-4">
             <div className="text-center">
               <p className="text-4xl font-black text-gray-900">
-                {reviews.average_rating.toFixed(1)}
+                {avgRating.toFixed(1)}
               </p>
-              <StarRow rating={reviews.average_rating} />
+              <StarRow rating={avgRating} />
               <p className="text-xs text-gray-400 mt-1">
-                {reviews.total} reviews
+                {total} reviews
               </p>
             </div>
             <div className="flex-1 space-y-1">
               {[5, 4, 3, 2, 1].map((star) => {
-                const count = reviews.rating_breakdown?.[String(star)] ?? 0;
-                const pct =
-                  reviews.total > 0 ? (count / reviews.total) * 100 : 0;
+                const count = Number(reviews.rating_breakdown?.[String(star)] ?? 0);
+                const pct = total > 0 ? (count / total) * 100 : 0;
                 return (
                   <div key={star} className="flex items-center gap-2 text-xs">
                     <span className="w-3 text-right text-gray-500">{star}</span>
@@ -310,7 +314,7 @@ function ReviewsSection({ reviews }: { reviews: ReviewsResponse | null }) {
       )}
 
       <div className="space-y-3">
-        {reviews.reviews.map((review) => (
+        {reviewList.map((review) => (
           <ReviewCard key={review.id} review={review} />
         ))}
       </div>
@@ -344,13 +348,14 @@ function ReviewCard({ review }: { review: ApiReview }) {
 }
 
 function StarRow({ rating, count }: { rating: number; count?: number }) {
-  const full = Math.floor(rating);
-  const half = rating - full >= 0.5;
+  const r = Number(rating);
+  const full = Math.floor(r);
+  const half = r - full >= 0.5;
   return (
     <div className="flex items-center gap-1">
       <div
         className="flex items-center gap-px"
-        aria-label={`${rating} out of 5`}
+        aria-label={`${r} out of 5`}
       >
         {[1, 2, 3, 4, 5].map((s) => (
           <span
@@ -368,7 +373,7 @@ function StarRow({ rating, count }: { rating: number; count?: number }) {
         ))}
       </div>
       <span className="text-sm text-gray-500 font-medium">
-        {rating.toFixed(1)}
+        {r.toFixed(1)}
       </span>
       {count !== undefined && count > 0 && (
         <span className="text-xs text-gray-400">

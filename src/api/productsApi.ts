@@ -101,3 +101,19 @@ export async function getProductReviews(
   );
   return data;
 }
+
+export interface CreateReviewPayload {
+  rating: number;
+  body: string;
+}
+
+export async function createReview(
+  productId: number,
+  payload: CreateReviewPayload,
+): Promise<ApiReview> {
+  const { data } = await axiosInstance.post<ApiReview | { review: ApiReview }>(
+    `/api/v1/products/${productId}/reviews`,
+    { review: payload },
+  );
+  return "review" in data ? data.review : data;
+}

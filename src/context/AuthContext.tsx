@@ -26,18 +26,29 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+function loadUser(): AuthUser | null {
+  try {
+    const raw = localStorage.getItem("auth_user");
+    return raw ? (JSON.parse(raw) as AuthUser) : null;
+  } catch {
+    return null;
+  }
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(loadUser);
 
   const loginUser = (apiUser: ApiUser, token?: string) => {
     if (token) localStorage.setItem("auth_token", token);
-    setUser({
+    const authUser: AuthUser = {
       id: apiUser.id,
       name: apiUser.full_name,
       email: apiUser.email,
       role: apiUser.role,
       authSource: apiUser.auth_source,
-    });
+    };
+    localStorage.setItem("auth_user", JSON.stringify(authUser));
+    setUser(authUser);
   };
 
   const signIn = (email: string, _password: string) => {
@@ -60,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await signOutApi();
     } catch {}
     localStorage.removeItem("auth_token");
+    localStorage.removeItem("auth_user");
     setUser(null);
   };
 
