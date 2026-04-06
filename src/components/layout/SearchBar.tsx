@@ -32,6 +32,7 @@ function SearchBar() {
       const next = new URLSearchParams(searchParams);
       if (trimmed) next.set("q", trimmed);
       else next.delete("q");
+      next.delete("page");
       navigate(`/products?${next.toString()}`, { replace: true });
     } else {
       if (trimmed) navigate(`/products?q=${encodeURIComponent(trimmed)}`);

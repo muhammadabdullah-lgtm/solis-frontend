@@ -74,9 +74,9 @@ function Header() {
 
   return (
     <header className="sticky top-0 z-50">
-      {/* ── Top bar ── */}
+
       <div className="bg-[#feee00]">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+        <div className="mx-auto px-4 lg:px-8">
           <div className="hidden md:flex items-center gap-4 h-16">
             <button
               onClick={() => navigate("/")}
@@ -175,12 +175,12 @@ function Header() {
         </div>
       </div>
 
-      {/* ── Category nav bar + mega menu ── */}
+
       <div
         className="bg-white border-b border-gray-200 shadow-sm relative"
         onMouseLeave={() => setHoveredCategoryId(null)}
       >
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+        <div className=" mx-auto px-4 lg:px-8">
           <div
             className="flex items-center gap-1 overflow-x-auto py-2"
             style={{ scrollbarWidth: "none" }}
@@ -214,7 +214,7 @@ function Header() {
           </div>
         </div>
 
-        {/* Mega menu panel */}
+
         {hoveredCategory &&
           (hoveredCategory.subcategories?.length ?? 0) > 0 && (
             <div
@@ -231,7 +231,7 @@ function Header() {
           )}
       </div>
 
-      {/* ── Mobile drawer ── */}
+
       {drawerOpen && (
         <div className="md:hidden bg-white border-b shadow-lg">
           <nav className="px-4 py-2 divide-y divide-gray-100">
@@ -282,7 +282,7 @@ function Header() {
   );
 }
 
-/* ── Mega menu panel ── */
+
 function MegaMenu({
   category,
   onNavigate,

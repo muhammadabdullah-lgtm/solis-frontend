@@ -49,7 +49,7 @@ function ProductDetail() {
   if (productLoading) {
     return (
       <div className="bg-gray-50 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+        <div className=" mx-auto px-4 lg:px-8 py-8">
           <div className="grid md:grid-cols-2 gap-8">
             <div className="bg-white rounded-2xl aspect-square animate-pulse" />
             <div className="space-y-4">
@@ -109,7 +109,7 @@ function ProductDetail() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+      <div className=" mx-auto px-4 lg:px-8 py-8">
         <button
           onClick={() => navigate(-1)}
           className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-black mb-6 transition-colors"

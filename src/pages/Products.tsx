@@ -228,7 +228,7 @@ function Products() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-8">
+      <div className=" mx-auto px-4 lg:px-8 py-8">
         <div className="flex gap-6 items-start">
           <aside className="hidden lg:block w-64 shrink-0 sticky top-[120px]">
             {sidebar}
