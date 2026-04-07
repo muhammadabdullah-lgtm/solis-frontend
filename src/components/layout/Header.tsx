@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import type { ReactNode } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import {
@@ -15,14 +15,15 @@ import { useCart } from "../../features/cart/context/CartContext";
 import { useAuth } from "../../features/auth/context/AuthContext";
 import { useCategories } from "../../features/categories/context/CategoriesContext";
 import type { ApiCategory } from "../../services/categories.service";
+import Button from "../ui/Button";
 import SearchBar from "./SearchBar";
+import TextLink from "../common/TextLink";
+import CartButton from "../common/CartButton";
 
 const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [hoveredCategoryId, setHoveredCategoryId] = useState<number | null>(
-    null,
-  );
+  const [hoveredCategoryId, setHoveredCategoryId] = useState<number | null>(null);
   const accountRef = useRef<HTMLDivElement>(null);
 
   const { cartCount } = useCart();
@@ -32,21 +33,26 @@ const Header = () => {
   const { pathname, search } = useLocation();
 
 
-  const catById = new Map(categories.map((c) => [c.id, c]));
+  const catById = useMemo(
+    () => new Map(categories.map((c) => [c.id, c])),
+    [categories],
+  );
 
-  const rootSlugById = new Map<number, string>();
-
-  const subSlugById = new Map<number, string>();
-  for (const cat of categories) {
-    for (const sub of cat.subcategories ?? []) {
-      rootSlugById.set(sub.id, cat.slug);
-      subSlugById.set(sub.id, sub.slug);
-      for (const leaf of sub.subcategories ?? []) {
-        rootSlugById.set(leaf.id, cat.slug);
-        subSlugById.set(leaf.id, sub.slug);
+  const { rootSlugById, subSlugById } = useMemo(() => {
+    const rootSlugById = new Map<number, string>();
+    const subSlugById = new Map<number, string>();
+    for (const cat of categories) {
+      for (const sub of cat.subcategories ?? []) {
+        rootSlugById.set(sub.id, cat.slug);
+        subSlugById.set(sub.id, sub.slug);
+        for (const leaf of sub.subcategories ?? []) {
+          rootSlugById.set(leaf.id, cat.slug);
+          subSlugById.set(leaf.id, sub.slug);
+        }
       }
     }
-  }
+    return { rootSlugById, subSlugById };
+  }, [categories]);
 
   const isActiveCat = (catId: number | null) => {
     if (catId === null) return pathname === "/";
@@ -61,10 +67,8 @@ const Header = () => {
     } else {
       const cat = catById.get(catId);
       if (cat) {
-
         navigate(`/products/${cat.slug}`);
       } else {
-
         const rootSlug = rootSlugById.get(catId);
         const subSlug = subSlugById.get(catId);
         if (rootSlug && subSlug) {
@@ -76,19 +80,18 @@ const Header = () => {
     setDrawerOpen(false);
   };
 
+
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (
-        accountRef.current &&
-        !accountRef.current.contains(e.target as Node)
-      ) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
         setAccountOpen(false);
       }
-    }
+    };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Close mega-menu on route change
   useEffect(() => {
     setHoveredCategoryId(null);
   }, [pathname, search]);
@@ -98,15 +101,18 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50">
 
+
       <div className="bg-[#feee00]">
         <div className="mx-auto px-4 lg:px-8">
+
+
           <div className="hidden md:flex items-center gap-4 h-16">
-            <button
-              onClick={() => navigate("/")}
+            <Link
+              to="/"
               className="text-2xl font-black text-black tracking-tight shrink-0 hover:opacity-75 transition-opacity"
             >
-             solis
-            </button>
+              solis
+            </Link>
 
             <button className="flex items-center gap-1 text-xs font-semibold text-black shrink-0 hover:opacity-75 transition-opacity whitespace-nowrap">
               <MapPin size={13} strokeWidth={2.5} />
@@ -128,66 +134,78 @@ const Header = () => {
               )}
 
               {isAuthenticated && (
-                <div className="relative" ref={accountRef}>
-                  <button
-                    onClick={() => setAccountOpen((o) => !o)}
-                    className="flex flex-col items-center gap-0.5 text-black hover:opacity-70 transition-opacity"
-                  >
-                    <div className="w-6 h-6 bg-black text-[#feee00] rounded-full flex items-center justify-center text-[10px] font-bold leading-none">
-                      {user?.name.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-[11px] font-medium leading-none">
-                      {user?.name.split(" ")[0]}
-                    </span>
-                  </button>
 
-                  {accountOpen && (
-                    <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl border border-gray-100 shadow-lg py-1 z-50">
-                      <p className="px-4 py-2 text-xs text-gray-400 border-b border-gray-100 truncate">
-                        {user?.email}
-                      </p>
-                      <Link
-                        to="/orders"
-                        onClick={() => setAccountOpen(false)}
-                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        My Orders
-                      </Link>
-                      <button
-                        onClick={() => {
-                          signOut();
-                          setAccountOpen(false);
-                        }}
-                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors border-t border-gray-100"
-                      >
-                        <LogOut size={14} /> Sign Out
-                      </button>
-                    </div>
-                  )}
-                </div>
+
+
+<div className="relative" ref={accountRef}>
+  <Button
+    onClick={() => setAccountOpen((o) => !o)}
+    variant="ghost"
+    className="flex flex-col items-center gap-0.5 text-black hover:opacity-70"
+  >
+    <div className="w-6 h-6 bg-black text-[#feee00] rounded-full flex items-center justify-center text-[10px] font-bold leading-none">
+      {user?.name.charAt(0).toUpperCase()}
+    </div>
+    <span className="text-[11px] font-medium leading-none">
+      {user?.name.split(" ")[0]}
+    </span>
+  </Button>
+
+  {accountOpen && (
+    <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl border border-gray-100 shadow-lg py-1 z-50">
+      <p className="px-4 py-2 text-xs text-gray-400 border-b border-gray-100 truncate">
+        {user?.email}
+      </p>
+
+      <Link
+        to="/orders"
+        onClick={() => setAccountOpen(false)}
+        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+      >
+        My Orders
+      </Link>
+
+      <Button
+        variant="danger"
+        size="md"
+        fullWidth
+        className="rounded-none border-t border-gray-100 justify-start font-normal"
+        onClick={() => {
+          signOut();
+          setAccountOpen(false);
+        }}
+      >
+        <LogOut size={14} /> Sign Out
+      </Button>
+    </div>
+  )}
+</div>
+
               )}
 
-              
               <CartButton count={cartCount} onClick={() => navigate("/cart")} />
             </div>
           </div>
 
-          {/* Mobile top bar */}
-          <div className="flex md:hidden items-center justify-between h-14">
-            <button
-              onClick={() => setDrawerOpen((o) => !o)}
-              className="text-black p-1 -ml-1"
-              aria-label="Toggle menu"
-            >
-              {drawerOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
 
-            <button
-              onClick={() => navigate("/")}
+          <div className="flex md:hidden items-center justify-between h-14">
+
+            <Button
+  variant="ghost"
+  size="sm"
+  onClick={() => setDrawerOpen((o) => !o)}
+  className="p-1 -ml-1" // preserve your custom positioning
+  aria-label="Toggle menu"
+>
+  {drawerOpen ? <X size={22} /> : <Menu size={22} />}
+</Button>
+
+            <Link
+              to="/"
               className="text-xl font-black text-black tracking-tight"
             >
               solis
-            </button>
+            </Link>
 
             <CartButton count={cartCount} onClick={() => navigate("/cart")} />
           </div>
@@ -203,44 +221,42 @@ const Header = () => {
         className="bg-white border-b border-gray-200 shadow-sm relative"
         onMouseLeave={() => setHoveredCategoryId(null)}
       >
-        <div className=" mx-auto px-4 lg:px-8">
+        <div className="mx-auto px-4 lg:px-8">
           <div
             className="flex items-center gap-1 overflow-x-auto py-2"
             style={{ scrollbarWidth: "none" }}
           >
-  
             {categories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => handleCategoryClick(cat.id)}
-                onMouseEnter={() => setHoveredCategoryId(cat.id)}
-                className={`whitespace-nowrap text-sm px-3 py-1.5 rounded-full font-medium shrink-0 transition-colors ${
-                  isActiveCat(cat.id)
-                    ? "bg-[#feee00] text-black"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {cat.name}
-              </button>
+<Button
+  key={cat.id}
+  variant="chip"
+  size="sm"
+  data-active={isActiveCat(cat.id)}
+  onClick={() => handleCategoryClick(cat.id)}
+  onMouseEnter={() => setHoveredCategoryId(cat.id)}
+  className="whitespace-nowrap shrink-0"
+>
+  {cat.name}
+</Button>
+ 
             ))}
           </div>
         </div>
 
 
-        {hoveredCategory &&
-          (hoveredCategory.subcategories?.length ?? 0) > 0 && (
-            <div
-              className="absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl z-40"
-              onMouseEnter={() => setHoveredCategoryId(hoveredCategory.id)}
-            >
-              <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
-                <MegaMenu
-                  category={hoveredCategory}
-                  onNavigate={handleCategoryClick}
-                />
-              </div>
+        {hoveredCategory && (hoveredCategory.subcategories?.length ?? 0) > 0 && (
+          <div
+            className="absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl z-40"
+            onMouseEnter={() => setHoveredCategoryId(hoveredCategory.id)}
+          >
+            <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
+              <MegaMenu
+                category={hoveredCategory}
+                onNavigate={handleCategoryClick}
+              />
             </div>
-          )}
+          </div>
+        )}
       </div>
 
 
@@ -267,7 +283,6 @@ const Header = () => {
                 danger
               />
             )}
-            <DrawerItem icon={<Heart size={18} />} label="Wishlist" />
             <DrawerItem icon={<MapPin size={18} />} label="Deliver to UAE" />
             <div className="pt-3 pb-2">
               <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
@@ -292,10 +307,11 @@ const Header = () => {
       )}
     </header>
   );
-}
+};
 
 
-const  MegaMenu = ({
+
+const MegaMenu = ({
   category,
   onNavigate,
 }: {
@@ -306,7 +322,7 @@ const  MegaMenu = ({
 
   return (
     <div
-      className={`grid gap-8`}
+      className="grid gap-8"
       style={{
         gridTemplateColumns: `repeat(${Math.min(cols.length, 5)}, minmax(0, 1fr))`,
       }}
@@ -323,12 +339,9 @@ const  MegaMenu = ({
             <ul className="space-y-1.5">
               {sub.subcategories!.map((leaf) => (
                 <li key={leaf.id}>
-                  <button
-                    onClick={() => onNavigate(leaf.id)}
-                    className="text-xs text-gray-500 hover:text-black transition-colors text-left"
-                  >
-                    {leaf.name}
-                  </button>
+                  <TextLink onClick={() => onNavigate(leaf.id)}>
+  {leaf.name}
+</TextLink>
                 </li>
               ))}
             </ul>
@@ -337,8 +350,7 @@ const  MegaMenu = ({
       ))}
     </div>
   );
-}
-
+};
 
 const NavAction = ({
   icon,
@@ -348,44 +360,17 @@ const NavAction = ({
   icon: ReactNode;
   label: string;
   onClick: () => void;
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      className="flex flex-col items-center gap-0.5 text-black hover:opacity-70 transition-opacity"
-    >
-      {icon}
-      <span className="text-[11px] font-medium leading-none">{label}</span>
-    </button>
-  );
-}
+}) => (
+  <button
+    onClick={onClick}
+    className="flex flex-col items-center gap-0.5 text-black hover:opacity-70 transition-opacity"
+  >
+    {icon}
+    <span className="text-[11px] font-medium leading-none">{label}</span>
+  </button>
+);
 
-const CartButton = ({
-  count,
-  onClick,
-}: {
-  count: number;
-  onClick: () => void;
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      className="flex flex-col items-center gap-0.5 text-black hover:opacity-70 transition-opacity"
-    >
-      <div className="relative">
-        <ShoppingCart size={20} />
-        {count > 0 && (
-          <span className="absolute -top-2 -right-2 bg-black text-[#feee00] text-[10px] min-w-[16px] h-4 px-0.5 rounded-full flex items-center justify-center font-bold leading-none">
-            {count}
-          </span>
-        )}
-      </div>
-      <span className="text-[11px] font-medium leading-none hidden md:block">
-        Cart
-      </span>
-    </button>
-  );
-}
+
 
 const DrawerItem = ({
   icon,
@@ -397,20 +382,16 @@ const DrawerItem = ({
   label: string;
   onClick?: () => void;
   danger?: boolean;
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex items-center gap-3 w-full py-3 text-sm transition-colors ${
-        danger
-          ? "text-red-500 hover:text-red-600"
-          : "text-gray-700 hover:text-black"
-      }`}
-    >
-      <span className={danger ? "text-red-400" : "text-gray-500"}>{icon}</span>
-      {label}
-    </button>
-  );
-}
+}) => (
+  <button
+    onClick={onClick}
+    className={`flex items-center gap-3 w-full py-3 text-sm transition-colors ${
+      danger ? "text-red-500 hover:text-red-600" : "text-gray-700 hover:text-black"
+    }`}
+  >
+    <span className={danger ? "text-red-400" : "text-gray-500"}>{icon}</span>
+    {label}
+  </button>
+);
 
 export default Header;

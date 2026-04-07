@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
@@ -55,12 +55,24 @@ function SignIn() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4 py-12">
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm w-full max-w-md p-8">
         <div className="text-center mb-8">
-          <button
-            onClick={() => navigate("/")}
-            className="text-3xl font-black text-black tracking-tight hover:opacity-75 transition-opacity"
-          >
-            solis
-          </button>
+
+
+<Button
+  variant="ghost"
+  onClick={() => navigate("/")}
+  className="
+    text-3xl font-black text-black tracking-tight 
+    hover:opacity-75 hover:bg-transparent
+    p-0 m-0
+    rounded-none
+    w-auto h-auto
+    min-w-0
+  "
+>
+  solis
+</Button>
+
+
           <p className="mt-2 text-sm text-gray-500">
             Welcome back! Sign in to continue.
           </p>
@@ -99,9 +111,7 @@ function SignIn() {
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <label className="text-sm font-medium text-gray-700">Password</label>
-              <button type="button" className="text-xs text-gray-500 hover:text-black transition-colors">
-                Forgot password?
-              </button>
+       
             </div>
             <Input
               type={showPassword ? "text" : "password"}
@@ -129,12 +139,9 @@ function SignIn() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Don't have an account?{" "}
-          <button
-            onClick={() => navigate("/sign-up")}
-            className="text-black font-semibold hover:underline"
-          >
-            Sign Up
-          </button>
+         <Link to="/sign-up" className="text-black font-semibold hover:underline">
+  Sign Up
+</Link>
         </p>
       </div>
     </div>

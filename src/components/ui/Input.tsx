@@ -6,12 +6,13 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   required?: boolean;
   rightElement?: ReactNode;
+  wrapperClassName?: string;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, required, rightElement, className = "", ...props }, ref) => {
+  ({ label, error, required, rightElement, wrapperClassName = "", className = "", ...props }, ref) => {
     return (
-      <div>
+      <div className={wrapperClassName}>
         {label && (
           <label className="block text-sm font-medium text-gray-700 mb-1.5">
             {label}

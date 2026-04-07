@@ -14,6 +14,7 @@ import type { LiveFilterDraft } from "../components/plp/LiveFilterSidebar";
 import SectionError from "../components/ui/SectionError";
 import SectionEmpty from "../components/ui/SectionEmpty";
 import PaginationBar from "../components/common/PaginationBar";
+import ProductGridSkeleton from "../components/common/ProductGridSkeleton";
 
 
 
@@ -369,11 +370,7 @@ const  Products = () => {
             )}
 
             {loading ? (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {Array.from({ length: PER_PAGE }).map((_, i) => (
-                  <div key={i} className="bg-white rounded-xl border border-gray-100 h-72 animate-pulse" />
-                ))}
-              </div>
+              <ProductGridSkeleton count={PER_PAGE} />
             ) : error ? (
               <SectionError onRetry={fetchProducts} />
             ) : products.length === 0 ? (

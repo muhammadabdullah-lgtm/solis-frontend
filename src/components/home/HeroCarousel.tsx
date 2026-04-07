@@ -88,7 +88,6 @@ const HeroCarousel = () => {
               alt={banner.title}
               className="w-full h-full object-cover"
             />
-            {/* Gradient overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent flex flex-col justify-center px-8 md:px-14">
               <h2 className="text-white text-xl md:text-3xl lg:text-4xl font-bold leading-tight">
                 {banner.title}
@@ -104,7 +103,7 @@ const HeroCarousel = () => {
         ))}
       </div>
 
-      {/* Prev arrow */}
+
       <button
         onClick={goPrev}
         className="absolute left-3 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white p-1.5 rounded-full shadow transition-colors"
@@ -122,7 +121,6 @@ const HeroCarousel = () => {
         <ChevronRight size={18} />
       </button>
 
-      {/* Dots */}
       <div className="absolute bottom-3 w-full flex justify-center gap-1.5">
         {banners.map((_, i) => (
           <button

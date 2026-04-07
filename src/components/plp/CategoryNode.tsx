@@ -1,6 +1,8 @@
 import { ChevronDown } from "lucide-react";
 import { useState } from "react";
 import type { ApiCategory, ApiSubcategory } from "../../services/categories.service";
+import Button from "../ui/Button";
+import SelectableItem from "../common/SelectableItem";
 
 const  CategoryNode = ({
   cat,
@@ -24,17 +26,30 @@ const  CategoryNode = ({
         style={{ paddingLeft: `${depth * 12}px` }}
       >
         {subs.length > 0 && (
-          <button
-            onClick={() => setOpen((o) => !o)}
-            className="text-gray-400 hover:text-gray-600 shrink-0"
-          >
-            <ChevronDown
-              size={13}
-              className={`transition-transform ${open ? "rotate-180" : ""}`}
-            />
-          </button>
+
+<Button
+  variant="ghost"
+  size="sm"
+  onClick={() => setOpen((o) => !o)}
+  className="
+    text-gray-400 hover:text-gray-600 
+    p-0 m-0
+    hover:bg-transparent
+    rounded-none
+    w-auto h-auto
+    min-w-0
+    shrink-0
+  "
+>
+  <ChevronDown
+    size={13}
+    className={`transition-transform ${open ? "rotate-180" : ""}`}
+  />
+</Button>
+
+
         )}
-        <button
+        {/* <button
           onClick={() => onSelect(cat.id)}
           className={`flex-1 text-left text-sm px-2 py-1 rounded-md transition-colors ${
             isSelected
@@ -43,7 +58,17 @@ const  CategoryNode = ({
           }`}
         >
           {cat.name}
-        </button>
+        </button> */}
+
+
+<SelectableItem
+  selected={isSelected}
+  onClick={() => onSelect(cat.id)}
+>
+  {cat.name}
+</SelectableItem>
+
+
       </div>
       {open && subs.length > 0 && (
         <ul className="mt-0.5 space-y-0.5">

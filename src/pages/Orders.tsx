@@ -1,18 +1,12 @@
 import { Link } from "react-router-dom";
-import type { OrderStatus } from "../services/orders.service";
 import { useOrders } from "../hooks/useOrders";
+import { formatDate, pluralise } from "../lib/utils";
 import SectionError from "../components/ui/SectionError";
 import SectionEmpty from "../components/ui/SectionEmpty";
+import StatusBadge from "../components/common/StatusBadge";
+import Card from "../components/ui/Card";
 
-const STATUS_STYLES: Record<OrderStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  confirmed: "bg-blue-100 text-blue-800",
-  shipped: "bg-purple-100 text-purple-800",
-  delivered: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
-};
-
-const  Orders = () => {
+const Orders = () => {
   const { orders, loading, error, retry } = useOrders();
 
   return (
@@ -29,15 +23,16 @@ const  Orders = () => {
         ) : error ? (
           <SectionError onRetry={retry} />
         ) : orders.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm">
+          <Card rounded="2xl">
             <SectionEmpty icon="📦" message="You haven't placed any orders yet." />
-          </div>
+          </Card>
         ) : (
           <div className="space-y-4">
             {orders.map((order) => (
-              <div
+              <Card
                 key={order.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0"
+                rounded="2xl"
+                className="px-5 py-4 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-0"
               >
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -46,16 +41,8 @@ const  Orders = () => {
                     </span>
                     <StatusBadge status={order.status} />
                   </div>
-                  <p className="text-xs text-gray-400">
-                    {new Date(order.created_at).toLocaleDateString("en-AE", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {order.total_items} {order.total_items === 1 ? "item" : "items"}
-                  </p>
+                  <p className="text-xs text-gray-400">{formatDate(order.created_at)}</p>
+                  <p className="text-xs text-gray-500">{pluralise(order.total_items, "item")}</p>
                 </div>
 
                 <div className="flex items-center gap-4 shrink-0">
@@ -69,23 +56,13 @@ const  Orders = () => {
                     View Details
                   </Link>
                 </div>
-              </div>
+              </Card>
             ))}
           </div>
         )}
       </div>
     </div>
   );
-}
-
-export function StatusBadge({ status }: { status: OrderStatus }) {
-  return (
-    <span
-      className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full capitalize ${STATUS_STYLES[status]}`}
-    >
-      {status}
-    </span>
-  );
-}
+};
 
 export default Orders;

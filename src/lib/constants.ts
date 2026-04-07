@@ -18,3 +18,16 @@ export const ORDER_STATUS_STYLES = {
 } as const;
 
 export const AUTH_ROUTES = ["/sign-in", "/sign-up"];
+
+
+
+
+export const PAYMENT_METHODS = [
+  "Visa",
+  "Mastercard",
+  "PayPal",
+  "Apple Pay",
+  "Cash on Delivery",
+];
+
+

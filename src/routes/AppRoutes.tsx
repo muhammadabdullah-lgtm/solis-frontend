@@ -18,9 +18,7 @@ const CategoryPage = lazy(() => import("../pages/CategoryPage"));
 
 function PageLoader() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-8 h-8 rounded-full border-2 border-gray-200 border-t-[#feee00] animate-spin" />
-    </div>
+    <PageLoader />
   );
 }
 
@@ -32,7 +30,7 @@ function AppRoutes() {
     <>
       {!isAuthPage && <Header />}
 
-      <Suspense fallback={<PageLoader />}>
+      {/* <Suspense fallback={<PageLoader />}> */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/cart" element={<Cart />} />
@@ -46,7 +44,7 @@ function AppRoutes() {
           <Route path="/orders" element={<ProtectedRoute><Orders /></ProtectedRoute>} />
           <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
         </Routes>
-      </Suspense>
+      {/* </Suspense> */}
 
       {!isAuthPage && <Footer />}
     </>

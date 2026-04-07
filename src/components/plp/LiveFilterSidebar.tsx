@@ -1,11 +1,14 @@
 import { useState } from "react";
-import type { ReactNode } from "react";
-import { ChevronDown, Search, X } from "lucide-react";
-import type { ApiCategory, ApiSubcategory } from "../../services/categories.service";
+
+
+import type { ApiCategory } from "../../services/categories.service";
 import type { ApiBrand } from "../../services/brands.service";
 import RatingSlider from "../common/RatingSlider";
 import CategoryNode from "./CategoryNode";
 import AccordionSection from "../common/AccordionSection";
+import { Search, XCircle } from "lucide-react";
+import Button from "../ui/Button";
+import SelectableItem from "../common/SelectableItem";
 
 export interface LiveFilterDraft {
   categoryId: number | null;
@@ -62,12 +65,24 @@ const LiveFilterSidebar = ({
           )}
         </h2>
         {activeCount > 0 && (
-          <button
-            onClick={onClearAll}
-            className="text-xs text-red-500 hover:text-red-600 font-medium flex items-center gap-1"
-          >
-            <X size={12} /> Clear All
-          </button>
+
+          <Button
+  variant="ghost"
+  size="sm"
+  onClick={onClearAll}
+  className="
+    text-xs text-red-500 hover:text-red-600 
+    font-medium
+    p-0 m-0
+    hover:bg-transparent
+    rounded-none
+    w-auto h-auto
+    min-w-0
+  "
+>
+  <XCircle size={12} />
+  Clear All
+</Button>
         )}
       </div>
 
@@ -84,6 +99,7 @@ const LiveFilterSidebar = ({
             >
               All
             </button>
+
           </li>
           {categories.map((cat) => (
             <CategoryNode

@@ -1,4 +1,5 @@
 import { RefreshCw } from "lucide-react";
+import Button from "./Button";
 
 const SectionError = ({ onRetry }: { onRetry: () => void }) => {
   return (
@@ -6,15 +7,12 @@ const SectionError = ({ onRetry }: { onRetry: () => void }) => {
       <p className="text-gray-400 text-sm">
         Something went wrong. Please try again.
       </p>
-      <button
-        onClick={onRetry}
-        className="flex items-center gap-2 text-sm font-medium text-gray-600 hover:text-black border border-gray-200 rounded-lg px-4 py-2 hover:border-gray-400 transition-colors"
-      >
+      <Button variant="outline" size="md" onClick={onRetry}>
         <RefreshCw size={14} />
         Retry
-      </button>
+      </Button>
     </div>
   );
-}
+};
 
 export default SectionError;

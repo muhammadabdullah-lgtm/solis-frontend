@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff } from "lucide-react";
@@ -156,12 +156,11 @@ function SignUp() {
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
-          <button
-            onClick={() => navigate("/sign-in")}
-            className="text-black font-semibold hover:underline"
-          >
-            Sign In
-          </button>
+
+      <Link to="/sign-in" className="text-black font-semibold hover:underline">
+  Sign In
+</Link>
+
         </p>
       </div>
     </div>

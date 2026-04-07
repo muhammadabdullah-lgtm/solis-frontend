@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import type { KeyboardEvent } from "react";
 import { Search, X } from "lucide-react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
+import Button from "../ui/Button";
+import Input from "../ui/Input";
 
 const SearchBar = () => {
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ const SearchBar = () => {
     }
   }, [searchParams, isProductsPage]);
 
-  // Clear input when navigating away from /products
+
   useEffect(() => {
     if (!isProductsPage) setQuery("");
   }, [isProductsPage]);
@@ -65,7 +67,7 @@ const SearchBar = () => {
     if (e.key === "Enter") handleSubmit();
   };
 
-  // Cleanup on unmount
+
   useEffect(
     () => () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -85,22 +87,34 @@ const SearchBar = () => {
           className="w-full pl-4 pr-8 h-10 outline-none text-sm text-gray-700 placeholder:text-gray-400"
         />
         {query && (
-          <button
-            onClick={handleClear}
-            aria-label="Clear search"
-            className="absolute right-2 text-gray-400 hover:text-gray-600 transition-colors"
-          >
-            <X size={14} />
-          </button>
+          <Button
+  variant="ghost"
+  size="sm"
+  onClick={handleClear}
+  aria-label="Clear search"
+  className="
+    absolute right-2 
+    p-0 m-0 
+    text-gray-400 hover:text-gray-600 
+    hover:bg-transparent
+    rounded-none
+    w-auto h-auto
+    min-w-0
+  "
+>
+  <X size={14} />
+</Button>
+     
         )}
       </div>
-      <button
+      <Button
+        variant="dark"
         onClick={handleSubmit}
         aria-label="Search"
-        className="bg-black text-[#feee00] px-4 h-full flex items-center justify-center hover:bg-gray-900 transition-colors shrink-0"
+        className="h-full rounded-none shrink-0"
       >
         <Search size={18} />
-      </button>
+      </Button>
     </div>
   );
 }

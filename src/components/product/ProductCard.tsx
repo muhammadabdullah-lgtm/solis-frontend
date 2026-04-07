@@ -4,6 +4,7 @@ import { useCart } from "../../features/cart/context/CartContext";
 import { useAuth } from "../../features/auth/context/AuthContext";
 import type { ApiProduct } from "../../services/products.service";
 import StarRating from "../common/StartRating";
+import Button from "../ui/Button";
 
 const ProductCard = ({ product }: { product: ApiProduct }) => {
   const { addToCart } = useCart();
@@ -83,14 +84,17 @@ const ProductCard = ({ product }: { product: ApiProduct }) => {
           )}
         </div>
 
-        <button
+        <Button
+          variant="primary"
+          size="md"
+          fullWidth
+          className="mt-3"
           onClick={handleAddToCart}
           disabled={!product.in_stock}
-          className="mt-3 w-full flex items-center justify-center gap-2 bg-[#feee00] text-black text-sm font-semibold py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <ShoppingCart size={14} />
           Add to Cart
-        </button>
+        </Button>
       </div>
     </div>
   );

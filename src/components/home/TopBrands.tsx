@@ -2,6 +2,8 @@ import { useNavigate } from "react-router-dom";
 import { useBrands } from "../../hooks/useBrands";
 import SectionError from "../ui/SectionError";
 import SectionEmpty from "../ui/SectionEmpty";
+import SectionTitle from "../common/SectionTitle";
+import BrandPill from "../common/BrandPill";
 
 const TopBrands = () => {
   const navigate = useNavigate();
@@ -11,10 +13,7 @@ const TopBrands = () => {
 
   return (
     <section>
-      <div className="mb-4">
-        <h2 className="text-lg font-bold text-gray-900">Top Brands</h2>
-        <div className="h-0.5 w-10 bg-[#feee00] mt-1 rounded-full" />
-      </div>
+      <SectionTitle>Top Brands</SectionTitle>
 
       {error ? (
         <SectionError onRetry={retry} />
@@ -23,18 +22,16 @@ const TopBrands = () => {
       ) : (
         <div className="flex flex-wrap gap-2">
           {brands.map((brand) => (
-            <button
+            <BrandPill
               key={brand.id}
+              name={brand.name}
               onClick={() => navigate(`/products?brand_id=${brand.id}`)}
-              className="px-4 py-2 bg-white border border-gray-200 rounded-full text-sm font-medium text-gray-700 hover:border-[#feee00] hover:bg-[#feee00]/10 transition-colors shadow-sm"
-            >
-              {brand.name}
-            </button>
+            />
           ))}
         </div>
       )}
     </section>
   );
-}
+};
 
 export default TopBrands;

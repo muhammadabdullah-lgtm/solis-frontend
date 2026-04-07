@@ -14,7 +14,8 @@ function App() {
           </CartProvider>
         </CategoriesProvider>
       </AuthProvider>
-    </ErrorBoundary>
+      </ErrorBoundary>
+
   );
 }
 

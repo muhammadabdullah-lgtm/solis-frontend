@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ShoppingCart, ChevronLeft, Minus, Plus } from "lucide-react";
+import { ShoppingCart } from "lucide-react";
+import Button from "../components/ui/Button";
 import { useCart } from "../features/cart/context/CartContext";
 import { useAuth } from "../features/auth/context/AuthContext";
 import { useProduct } from "../hooks/useProduct";
@@ -9,6 +10,9 @@ import StarRating from "../components/common/StartRating";
 import ReviewsSection from "../components/common/ReviewSection";
 import SectionTitle from "../components/common/SectionTitle";
 import DataNotFound from "../components/common/DataNotFound";
+import QuantityStepper from "../components/common/QuantityStepper";
+import StockBadge from "../components/common/StockBadge";
+import BackButton from "../components/common/BackButton";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -55,13 +59,9 @@ const ProductDetail = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="mx-auto px-4 lg:px-8 py-8">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-black mb-6 transition-colors"
-        >
-          <ChevronLeft size={15} />
-          Back
-        </button>
+        <div className="mb-6">
+          <BackButton onClick={() => navigate(-1)} />
+        </div>
 
         <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
           <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm">
@@ -116,48 +116,30 @@ const ProductDetail = () => {
               )}
             </div>
 
-            <p
-              className={`text-sm font-medium ${
-                product.in_stock ? "text-green-600" : "text-red-500"
-              }`}
-            >
-              {product.in_stock
-                ? `In Stock (${product.stock_quantity} available)`
-                : "Out of Stock"}
-            </p>
+            <StockBadge
+              inStock={product.in_stock}
+              stockQuantity={product.stock_quantity}
+              size="sm"
+            />
 
             {product.in_stock && (
               <div className="flex items-center gap-3 flex-wrap">
-                <div className="flex items-center border border-gray-300 rounded-lg overflow-hidden select-none">
-                  <button
-                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors"
-                    disabled={quantity <= 1}
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <span className="w-12 text-center text-sm font-semibold border-x border-gray-300">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() =>
-                      setQuantity((q) => Math.min(product.stock_quantity, q + 1))
-                    }
-                    className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 transition-colors"
-                    disabled={quantity >= product.stock_quantity}
-                  >
-                    <Plus size={14} />
-                  </button>
-                </div>
+                <QuantityStepper
+                  quantity={quantity}
+                  max={product.stock_quantity}
+                  onChange={setQuantity}
+                />
 
-                <button
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="flex-1 min-w-[160px] px-6"
                   onClick={handleAddToCart}
                   disabled={addingToCart}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[#feee00] text-black font-semibold py-2.5 px-6 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-60 min-w-[160px]"
                 >
                   <ShoppingCart size={16} />
                   {addedFeedback ? "Added!" : addingToCart ? "Adding…" : "Add to Cart"}
-                </button>
+                </Button>
               </div>
             )}
 
