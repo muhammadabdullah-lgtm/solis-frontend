@@ -11,7 +11,7 @@ import Input from "../components/ui/Input";
 import Button from "../components/ui/Button";
 import FormError from "../components/ui/FormError";
 
-function Checkout() {
+const  Checkout = () => {
   const { cart, clearCart } = useCart();
   const navigate = useNavigate();
   const [apiErrors, setApiErrors] = useState<string[]>([]);

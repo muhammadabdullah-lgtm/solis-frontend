@@ -19,7 +19,7 @@ const SLUG_EMOJI: Record<string, string> = {
   laptops: "💻",
 };
 
-function FeaturedCategories() {
+const FeaturedCategories = () => {
   const { categories, loading, error, retry } = useCategories();
   const navigate = useNavigate();
 

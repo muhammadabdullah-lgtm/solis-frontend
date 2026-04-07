@@ -17,7 +17,7 @@ import { useCategories } from "../../features/categories/context/CategoriesConte
 import type { ApiCategory } from "../../services/categories.service";
 import SearchBar from "./SearchBar";
 
-function Header() {
+const Header = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [hoveredCategoryId, setHoveredCategoryId] = useState<number | null>(
@@ -208,18 +208,7 @@ function Header() {
             className="flex items-center gap-1 overflow-x-auto py-2"
             style={{ scrollbarWidth: "none" }}
           >
-            {/* All */}
-            {/* <button
-              onClick={() => handleCategoryClick(null)}
-              className={`whitespace-nowrap text-sm px-3 py-1.5 rounded-full font-medium shrink-0 transition-colors ${
-                isActiveCat(null)
-                  ? "bg-[#feee00] text-black"
-                  : "text-gray-600 hover:bg-gray-100"
-              }`}
-            >
-              All
-            </button> */}
-
+  
             {categories.map((cat) => (
               <button
                 key={cat.id}
@@ -306,13 +295,13 @@ function Header() {
 }
 
 
-function MegaMenu({
+const  MegaMenu = ({
   category,
   onNavigate,
 }: {
   category: ApiCategory;
   onNavigate: (catId: number) => void;
-}) {
+}) => {
   const cols = category.subcategories ?? [];
 
   return (
@@ -351,7 +340,7 @@ function MegaMenu({
 }
 
 
-function NavAction({
+const NavAction = ({
   icon,
   label,
   onClick,
@@ -359,7 +348,7 @@ function NavAction({
   icon: ReactNode;
   label: string;
   onClick: () => void;
-}) {
+}) => {
   return (
     <button
       onClick={onClick}
@@ -371,13 +360,13 @@ function NavAction({
   );
 }
 
-function CartButton({
+const CartButton = ({
   count,
   onClick,
 }: {
   count: number;
   onClick: () => void;
-}) {
+}) => {
   return (
     <button
       onClick={onClick}
@@ -398,7 +387,7 @@ function CartButton({
   );
 }
 
-function DrawerItem({
+const DrawerItem = ({
   icon,
   label,
   onClick,
@@ -408,7 +397,7 @@ function DrawerItem({
   label: string;
   onClick?: () => void;
   danger?: boolean;
-}) {
+}) => {
   return (
     <button
       onClick={onClick}

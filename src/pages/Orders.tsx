@@ -12,7 +12,7 @@ const STATUS_STYLES: Record<OrderStatus, string> = {
   cancelled: "bg-red-100 text-red-800",
 };
 
-function Orders() {
+const  Orders = () => {
   const { orders, loading, error, retry } = useOrders();
 
   return (

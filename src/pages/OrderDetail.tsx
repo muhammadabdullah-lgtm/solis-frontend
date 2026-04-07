@@ -5,8 +5,9 @@ import type { OrderItem } from "../services/orders.service";
 import { createReview } from "../services/products.service";
 import { useOrderDetail } from "../hooks/useOrderDetail";
 import { StatusBadge } from "./Orders";
+import DataNotFound from "../components/common/DataNotFound";
 
-// ─── Review Modal ─────────────────────────────────────────────────────────────
+
 
 interface ReviewModalProps {
   item: OrderItem;
@@ -15,7 +16,7 @@ interface ReviewModalProps {
   onSubmitted: (itemId: number) => void;
 }
 
-function ReviewModal({ item, currency, onClose, onSubmitted }: ReviewModalProps) {
+const  ReviewModal = ({ item, currency, onClose, onSubmitted }: ReviewModalProps) => {
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [body, setBody] = useState("");
@@ -130,9 +131,9 @@ function ReviewModal({ item, currency, onClose, onSubmitted }: ReviewModalProps)
   );
 }
 
-// ─── Order Detail Page ────────────────────────────────────────────────────────
 
-function OrderDetail() {
+
+const OrderDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
@@ -158,19 +159,13 @@ function OrderDetail() {
   }
 
   if (error || !order) {
+ 
     return (
-      <div className="bg-gray-50 min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-3">
-          <p className="text-4xl">😕</p>
-          <p className="text-gray-500 text-sm">Order not found or failed to load.</p>
-          <button
-            onClick={() => navigate("/orders")}
-            className="text-sm font-medium text-gray-700 hover:text-black underline underline-offset-2"
-          >
-            Back to Orders
-          </button>
-        </div>
-      </div>
+         <DataNotFound
+  text="Order not found or failed to load."
+  routeBack="orders"
+/>
+
     );
   }
 

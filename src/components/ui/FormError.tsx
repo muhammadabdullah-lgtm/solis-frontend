@@ -1,4 +1,4 @@
-function FormError({ errors }: { errors: string[] }) {
+const FormError = ({ errors }: { errors: string[] }) => {
   if (errors.length === 0) return null;
 
   return (

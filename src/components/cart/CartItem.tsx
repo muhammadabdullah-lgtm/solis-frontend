@@ -8,7 +8,7 @@ interface Props {
   updateQuantity: (itemId: number, quantity: number) => Promise<void>;
 }
 
-function CartItemRow({ item, removeFromCart, updateQuantity }: Props) {
+const CartItemRow = ({ item, removeFromCart, updateQuantity }: Props) => {
   const [busy, setBusy] = useState(false);
 
   const handleUpdate = async (newQty: number) => {
@@ -35,7 +35,7 @@ function CartItemRow({ item, removeFromCart, updateQuantity }: Props) {
     <div
       className={`bg-white rounded-xl border border-gray-100 shadow-sm p-4 flex gap-4 transition-opacity ${busy ? "opacity-60 pointer-events-none" : ""}`}
     >
-      {/* Image */}
+
       <img
         src={item.product.image_url}
         alt={item.product.name}

@@ -33,7 +33,7 @@ const banners: Banner[] = [
   },
 ];
 
-function HeroCarousel() {
+const HeroCarousel = () => {
   const [current, setCurrent] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const touchStartX = useRef(0);

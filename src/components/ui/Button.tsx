@@ -21,7 +21,7 @@ const SIZE_CLASSES = {
   lg: "px-6 py-3 text-sm",
 };
 
-function Button({
+const Button = ({
   children,
   variant = "primary",
   size = "md",
@@ -30,7 +30,7 @@ function Button({
   disabled,
   className = "",
   ...props
-}: ButtonProps) {
+}: ButtonProps) => {
   return (
     <button
       disabled={disabled || loading}

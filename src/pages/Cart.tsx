@@ -4,7 +4,7 @@ import EmptyCart from "../components/cart/EmptyCart";
 import { useCart } from "../features/cart/context/CartContext";
 import { useAuth } from "../features/auth/context/AuthContext";
 
-function Cart() {
+const  Cart = ()  =>{
   const { cart, loading, removeFromCart, updateQuantity, clearCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();

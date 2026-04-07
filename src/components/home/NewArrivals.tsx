@@ -5,7 +5,7 @@ import ProductCard from "../product/ProductCard";
 import SectionError from "../ui/SectionError";
 import SectionEmpty from "../ui/SectionEmpty";
 
-function NewArrivals() {
+const NewArrivals = () => {
   const navigate = useNavigate();
   const { products, loading, error, retry } = useProducts({ sort: "newest", per_page: 8 });
 

@@ -3,8 +3,9 @@ import { ShoppingCart } from "lucide-react";
 import { useCart } from "../../features/cart/context/CartContext";
 import { useAuth } from "../../features/auth/context/AuthContext";
 import type { ApiProduct } from "../../services/products.service";
+import StarRating from "../common/StartRating";
 
-function ProductCard({ product }: { product: ApiProduct }) {
+const ProductCard = ({ product }: { product: ApiProduct }) => {
   const { addToCart } = useCart();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
@@ -95,39 +96,6 @@ function ProductCard({ product }: { product: ApiProduct }) {
   );
 }
 
-function StarRating({ rating, count }: { rating: number; count: number }) {
-  const full = Math.floor(rating);
-  const half = rating - full >= 0.5;
 
-  return (
-    <div className="flex items-center gap-1">
-      <div
-        className="flex items-center gap-px"
-        aria-label={`${rating} out of 5`}
-      >
-        {[1, 2, 3, 4, 5].map((s) => (
-          <span
-            key={s}
-            className={`text-xs leading-none ${
-              s <= full
-                ? "text-amber-400"
-                : s === full + 1 && half
-                  ? "text-amber-300"
-                  : "text-gray-200"
-            }`}
-          >
-            ★
-          </span>
-        ))}
-      </div>
-      <span className="text-xs text-gray-500 font-medium">{rating}</span>
-      {count > 0 && (
-        <span className="text-xs text-gray-400">
-          ({count.toLocaleString()})
-        </span>
-      )}
-    </div>
-  );
-}
 
 export default ProductCard;

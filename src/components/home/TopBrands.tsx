@@ -3,7 +3,7 @@ import { useBrands } from "../../hooks/useBrands";
 import SectionError from "../ui/SectionError";
 import SectionEmpty from "../ui/SectionEmpty";
 
-function TopBrands() {
+const TopBrands = () => {
   const navigate = useNavigate();
   const { brands, loading, error, retry } = useBrands();
 

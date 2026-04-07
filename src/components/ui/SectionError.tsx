@@ -1,6 +1,6 @@
 import { RefreshCw } from "lucide-react";
 
-function SectionError({ onRetry }: { onRetry: () => void }) {
+const SectionError = ({ onRetry }: { onRetry: () => void }) => {
   return (
     <div className="flex flex-col items-center justify-center py-12 gap-3 text-center">
       <p className="text-gray-400 text-sm">

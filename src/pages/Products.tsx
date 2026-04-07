@@ -1,26 +1,27 @@
 import { useEffect, useCallback, useRef, useReducer } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Search, SlidersHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, SlidersHorizontal, X } from "lucide-react";
 import { getProducts } from "../services/products.service";
 import type { ApiProduct, Pagination } from "../services/products.service";
 import { useBrands } from "../hooks/useBrands";
 import { useCategories } from "../features/categories/context/CategoriesContext";
 import { PER_PAGE, SORT_OPTIONS } from "../lib/constants";
+import { pluralise } from "../lib/utils";
+import type { ApiCategory } from "../services/categories.service";
 import ProductCard from "../components/product/ProductCard";
 import LiveFilterSidebar from "../components/plp/LiveFilterSidebar";
 import type { LiveFilterDraft } from "../components/plp/LiveFilterSidebar";
 import SectionError from "../components/ui/SectionError";
 import SectionEmpty from "../components/ui/SectionEmpty";
+import PaginationBar from "../components/common/PaginationBar";
 
-// ─── Reducer ──────────────────────────────────────────────────────────────────
+
 
 type ProductsState = {
-  // pending filter values — committed to URL on apply/search
   draft: LiveFilterDraft;
   query: string;
   sort: string;
   sidebarOpen: boolean;
-  // fetch state
   products: ApiProduct[];
   pagination: Pagination | null;
   loading: boolean;
@@ -89,84 +90,24 @@ function reducer(state: ProductsState, action: ProductsAction): ProductsState {
   }
 }
 
-// ─── Pagination ───────────────────────────────────────────────────────────────
 
-function getPageNumbers(current: number, total: number): (number | null)[] {
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
-  const pages: (number | null)[] = [1];
-  if (current > 3) pages.push(null);
-  for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) {
-    pages.push(p);
+
+function findCategoryName(categories: ApiCategory[], id: number): string {
+  for (const cat of categories) {
+    if (cat.id === id) return cat.name;
+    for (const sub of cat.subcategories ?? []) {
+      if (sub.id === id) return sub.name;
+      for (const leaf of sub.subcategories ?? []) {
+        if (leaf.id === id) return leaf.name;
+      }
+    }
   }
-  if (current < total - 2) pages.push(null);
-  pages.push(total);
-  return pages;
+  return `Category ${id}`;
 }
 
-function PaginationBar({
-  pagination,
-  onPageChange,
-}: {
-  pagination: Pagination;
-  onPageChange: (page: number) => void;
-}) {
-  const { current_page, total_pages, total_count, per_page } = pagination;
-  if (total_pages <= 1) return null;
 
-  const from = (current_page - 1) * per_page + 1;
-  const to = Math.min(current_page * per_page, total_count);
 
-  return (
-    <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-      <p className="text-sm text-gray-500 shrink-0">
-        Showing {from}–{to} of {total_count} products
-      </p>
-      <div className="flex items-center gap-1">
-        <button
-          onClick={() => onPageChange(current_page - 1)}
-          disabled={current_page === 1}
-          className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          aria-label="Previous page"
-        >
-          <ChevronLeft size={16} />
-        </button>
-
-        {getPageNumbers(current_page, total_pages).map((p, i) =>
-          p === null ? (
-            <span key={`e-${i}`} className="w-9 h-9 flex items-center justify-center text-gray-400 text-sm">
-              …
-            </span>
-          ) : (
-            <button
-              key={p}
-              onClick={() => onPageChange(p)}
-              className={`w-9 h-9 flex items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
-                p === current_page
-                  ? "bg-[#feee00] text-black border border-[#feee00]"
-                  : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-            >
-              {p}
-            </button>
-          ),
-        )}
-
-        <button
-          onClick={() => onPageChange(current_page + 1)}
-          disabled={current_page === total_pages}
-          className="w-9 h-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-          aria-label="Next page"
-        >
-          <ChevronRight size={16} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Main page ────────────────────────────────────────────────────────────────
-
-function Products() {
+const  Products = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { categories } = useCategories();
   const { brands } = useBrands();
@@ -177,7 +118,7 @@ function Products() {
 
   const currentPage = Number(searchParams.get("page") ?? "1");
 
-  // ── Fetch ──
+
   const fetchProducts = useCallback(() => {
     dispatch({ type: "FETCH_START" });
 
@@ -209,7 +150,7 @@ function Products() {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Keep pending filter inputs in sync when URL changes externally (back/forward)
+
   useEffect(() => {
     dispatch({ type: "SYNC_FROM_URL", params: searchParams });
   }, [searchParams]);
@@ -241,6 +182,31 @@ function Products() {
     setSearchParams(next);
   };
 
+  const handleSortChange = (value: string) => {
+    dispatch({ type: "SET_SORT", sort: value });
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set("sort", value);
+    else next.delete("sort");
+    next.delete("page");
+    setSearchParams(next);
+  };
+
+  const handleSearch = () => {
+    const next = new URLSearchParams(searchParams);
+    if (query) next.set("q", query);
+    else next.delete("q");
+    next.delete("page");
+    setSearchParams(next);
+  };
+
+  const handleClearQuery = () => {
+    dispatch({ type: "SET_QUERY", query: "" });
+    const next = new URLSearchParams(searchParams);
+    next.delete("q");
+    next.delete("page");
+    setSearchParams(next);
+  };
+
   const applyFilters = () => {
     const next = new URLSearchParams(searchParams);
     if (draft.minPrice) next.set("min_price", draft.minPrice);
@@ -266,40 +232,11 @@ function Products() {
     setSearchParams(new URLSearchParams());
   };
 
-  const handleSortChange = (value: string) => {
-    dispatch({ type: "SET_SORT", sort: value });
-    const next = new URLSearchParams(searchParams);
-    if (value) next.set("sort", value);
-    else next.delete("sort");
-    next.delete("page");
-    setSearchParams(next);
-  };
 
-  const handleSearch = () => {
-    const next = new URLSearchParams(searchParams);
-    if (query) next.set("q", query);
-    else next.delete("q");
-    next.delete("page");
-    setSearchParams(next);
-  };
-
-  // ── Active filter chips ──
   const activeChips: { label: string; onRemove: () => void }[] = [];
   if (draft.categoryId) {
-    const findName = (id: number): string => {
-      for (const cat of categories) {
-        if (cat.id === id) return cat.name;
-        for (const sub of cat.subcategories ?? []) {
-          if (sub.id === id) return sub.name;
-          for (const leaf of sub.subcategories ?? []) {
-            if (leaf.id === id) return leaf.name;
-          }
-        }
-      }
-      return `Category ${id}`;
-    };
     activeChips.push({
-      label: findName(draft.categoryId),
+      label: findCategoryName(categories, draft.categoryId),
       onRemove: () => {
         const next = new URLSearchParams(searchParams);
         next.delete("category_id");
@@ -356,7 +293,7 @@ function Products() {
 
   return (
     <div className="bg-gray-50 min-h-screen">
-      <div className=" mx-auto px-4 lg:px-8 py-8">
+      <div className="mx-auto px-4 lg:px-8 py-8">
         <div className="flex gap-6 items-start">
           <aside className="hidden lg:block w-64 shrink-0 sticky top-[120px]">
             {sidebar}
@@ -380,13 +317,7 @@ function Products() {
                 />
                 {query && (
                   <button
-                    onClick={() => {
-                      dispatch({ type: "SET_QUERY", query: "" });
-                      const next = new URLSearchParams(searchParams);
-                      next.delete("q");
-                      next.delete("page");
-                      setSearchParams(next);
-                    }}
+                    onClick={handleClearQuery}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   >
                     <X size={14} />
@@ -433,8 +364,7 @@ function Products() {
 
             {!loading && !error && pagination && (
               <p className="text-sm text-gray-500 mb-4">
-                {pagination.total_count}{" "}
-                {pagination.total_count === 1 ? "product" : "products"} found
+                {pluralise(pagination.total_count, "product")} found
               </p>
             )}
 
@@ -455,7 +385,6 @@ function Products() {
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
-
                 {pagination && (
                   <PaginationBar pagination={pagination} onPageChange={handlePageChange} />
                 )}
@@ -467,7 +396,10 @@ function Products() {
 
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
-          <div className="flex-1 bg-black/40" onClick={() => dispatch({ type: "CLOSE_SIDEBAR" })} />
+          <div
+            className="flex-1 bg-black/40"
+            onClick={() => dispatch({ type: "CLOSE_SIDEBAR" })}
+          />
           <div className="w-72 bg-gray-50 h-full overflow-y-auto p-4 shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-gray-900">Filters</h2>

@@ -1,7 +1,4 @@
-/**
- * Calculate discount percentage between price and compare_at_price.
- * Returns null if no compare_at_price is provided.
- */
+
 export function calcDiscount(
   price: string | number,
   compareAtPrice: string | number | null,
@@ -10,9 +7,7 @@ export function calcDiscount(
   return Math.round((1 - Number(price) / Number(compareAtPrice)) * 100);
 }
 
-/**
- * Format a date string for display (e.g. "5 April 2025").
- */
+
 export function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString("en-AE", {
     day: "numeric",
@@ -21,9 +16,7 @@ export function formatDate(dateString: string): string {
   });
 }
 
-/**
- * Format a short date string (e.g. "5 Apr 2025").
- */
+
 export function formatDateShort(dateString: string): string {
   return new Date(dateString).toLocaleDateString("en-AE", {
     day: "numeric",
@@ -32,9 +25,18 @@ export function formatDateShort(dateString: string): string {
   });
 }
 
-/**
- * Pluralise a word based on count (e.g. "1 item", "2 items").
- */
 export function pluralise(count: number, singular: string, plural = `${singular}s`): string {
   return `${count} ${count === 1 ? singular : plural}`;
+}
+
+export function getPageNumbers(current: number, total: number): (number | null)[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages: (number | null)[] = [1];
+  if (current > 3) pages.push(null);
+  for (let p = Math.max(2, current - 1); p <= Math.min(total - 1, current + 1); p++) {
+    pages.push(p);
+  }
+  if (current < total - 2) pages.push(null);
+  pages.push(total);
+  return pages;
 }

@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { FaFacebook, FaTwitter, FaYoutube, FaInstagram } from "react-icons/fa";
 import { MapPin, Phone, Mail, Apple, ArrowRight } from "lucide-react";
 
-/* ── Data ── */
+
 
 const footerLinks = [
   {
@@ -42,15 +42,15 @@ const paymentMethods = [
   "Cash on Delivery",
 ];
 
-/* ── Component ── */
 
-function Footer() {
+
+const Footer = () => {
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
 
   const handleSubscribe = () => {
     if (email.trim()) {
-      // TODO: wire up newsletter API
+
       setEmail("");
     }
   };
@@ -213,7 +213,7 @@ function Footer() {
   );
 }
 
-/* ── Google Play icon (SVG — not in lucide) ── */
+
 function GooglePlayIcon() {
   return (
     <svg

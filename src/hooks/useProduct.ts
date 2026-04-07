@@ -36,7 +36,7 @@ export function useProduct(id: string | undefined): UseProductResult {
         }
         setProduct(p);
 
-        // Reviews are non-critical — a failure only nulls them out
+
         getProductReviews(p.id)
           .then((r) => {
             if (!cancelled) setReviews(r);

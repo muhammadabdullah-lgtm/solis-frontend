@@ -1,7 +1,7 @@
 import { ShoppingCart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-function EmptyCart() {
+const EmptyCart = () => {
   const navigate = useNavigate();
 
   return (
