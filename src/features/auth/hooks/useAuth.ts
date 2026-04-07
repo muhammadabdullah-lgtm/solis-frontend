@@ -4,7 +4,6 @@ import { signOut as signOutApi } from "../../../services/auth.service";
 import {
   loginUser as loginUserAction,
   signIn as signInAction,
-  signInWithGoogle as signInWithGoogleAction,
   signOut as signOutAction,
 } from "../store/auth.actions";
 
@@ -48,21 +47,6 @@ export function useAuth() {
     dispatch(signInAction(email));
   };
 
-  const signInWithGoogle = () => {
-    localStorage.setItem(
-      "auth_user",
-      JSON.stringify({
-        id: 0,
-        name: "Google User",
-        email: "user@gmail.com",
-        role: "user",
-        authSource: "google",
-      }),
-    );
-
-    dispatch(signInWithGoogleAction());
-  };
-
   const signOut = async () => {
     try {
       await signOutApi();
@@ -78,7 +62,6 @@ export function useAuth() {
     isAuthenticated,
     loginUser,
     signIn,
-    signInWithGoogle,
     signOut,
   };
 }

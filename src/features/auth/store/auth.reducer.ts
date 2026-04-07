@@ -1,10 +1,5 @@
 import type { AuthAction, AuthState, AuthUser } from "./auth.types";
-import {
-  AUTH_LOGIN,
-  AUTH_SIGN_IN,
-  AUTH_SIGN_IN_WITH_GOOGLE,
-  AUTH_SIGN_OUT,
-} from "./auth.types";
+import { AUTH_LOGIN, AUTH_SIGN_IN, AUTH_SIGN_OUT } from "./auth.types";
 
 function loadUser(): AuthUser | null {
   try {
@@ -56,18 +51,6 @@ export default function authReducer(
         isAuthenticated: true,
       };
     }
-
-    case AUTH_SIGN_IN_WITH_GOOGLE:
-      return {
-        user: {
-          id: 0,
-          name: "Google User",
-          email: "user@gmail.com",
-          role: "user",
-          authSource: "google",
-        },
-        isAuthenticated: true,
-      };
 
     case AUTH_SIGN_OUT:
       return {

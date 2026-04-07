@@ -21,7 +21,6 @@ export interface LoginUserPayload {
 
 export const AUTH_LOGIN = "auth/login";
 export const AUTH_SIGN_IN = "auth/signIn";
-export const AUTH_SIGN_IN_WITH_GOOGLE = "auth/signInWithGoogle";
 export const AUTH_SIGN_OUT = "auth/signOut";
 
 interface LoginAction {
@@ -36,10 +35,6 @@ interface SignInAction {
   };
 }
 
-interface SignInWithGoogleAction {
-  type: typeof AUTH_SIGN_IN_WITH_GOOGLE;
-}
-
 interface SignOutAction {
   type: typeof AUTH_SIGN_OUT;
 }
@@ -47,5 +42,4 @@ interface SignOutAction {
 export type AuthAction =
   | LoginAction
   | SignInAction
-  | SignInWithGoogleAction
   | SignOutAction;
