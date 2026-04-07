@@ -6,14 +6,12 @@ import {
   X,
   MapPin,
   User,
-  Heart,
-  ShoppingCart,
   ChevronDown,
   LogOut,
 } from "lucide-react";
-import { useCart } from "../../features/cart/context/CartContext";
-import { useAuth } from "../../features/auth/context/AuthContext";
-import { useCategories } from "../../features/categories/context/CategoriesContext";
+import { useCart } from "../../features/cart/hooks/useCart";
+import { useAuth } from "../../features/auth/hooks/useAuth";
+import { useCategories } from "../../features/categories/hooks/useCategories";
 import type { ApiCategory } from "../../services/categories.service";
 import Button from "../ui/Button";
 import SearchBar from "./SearchBar";

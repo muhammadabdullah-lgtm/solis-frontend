@@ -1,7 +1,6 @@
 import { Navigate, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
-import { useAuth } from "../features/auth/context/AuthContext";
-
+import { useAuth } from "../features/auth/hooks/useAuth";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated } = useAuth();

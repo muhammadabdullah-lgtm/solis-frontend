@@ -4,7 +4,7 @@ import { Search, SlidersHorizontal, X } from "lucide-react";
 import { getProducts } from "../services/products.service";
 import type { ApiProduct, Pagination } from "../services/products.service";
 import { useBrands } from "../hooks/useBrands";
-import { useCategories } from "../features/categories/context/CategoriesContext";
+import { useCategories } from "../features/categories/hooks/useCategories";
 import { PER_PAGE, SORT_OPTIONS } from "../lib/constants";
 import { pluralise } from "../lib/utils";
 import type { ApiCategory } from "../services/categories.service";

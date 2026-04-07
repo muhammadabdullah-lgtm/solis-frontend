@@ -1,8 +1,8 @@
 import CartItemRow from "../components/cart/CartItem";
 import EmptyCart from "../components/cart/EmptyCart";
 import OrderSummary from "../components/cart/OrderSummary";
-import { useCart } from "../features/cart/context/CartContext";
-import { useAuth } from "../features/auth/context/AuthContext";
+import { useCart } from "../features/cart/hooks/useCart";
+import { useAuth } from "../features/auth/hooks/useAuth";
 import { pluralise } from "../lib/utils";
 import Button from "../components/ui/Button";
 

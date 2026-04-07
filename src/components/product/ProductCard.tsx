@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ShoppingCart } from "lucide-react";
-import { useCart } from "../../features/cart/context/CartContext";
-import { useAuth } from "../../features/auth/context/AuthContext";
+import { useCart } from "../../features/cart/hooks/useCart";
+import { useAuth } from "../../features/auth/hooks/useAuth";
 import type { ApiProduct } from "../../services/products.service";
 import StarRating from "../common/StartRating";
 import Button from "../ui/Button";

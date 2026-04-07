@@ -1,21 +1,13 @@
-import { AuthProvider } from "./features/auth/context/AuthContext";
-import { CategoriesProvider } from "./features/categories/context/CategoriesContext";
-import { CartProvider } from "./features/cart/context/CartContext";
+import CartSync from "./features/cart/components/CartSync";
 import AppRoutes from "./routes/AppRoutes";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 
 function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <CategoriesProvider>
-          <CartProvider>
-            <AppRoutes />
-          </CartProvider>
-        </CategoriesProvider>
-      </AuthProvider>
-      </ErrorBoundary>
-
+      <CartSync />
+      <AppRoutes />
+    </ErrorBoundary>
   );
 }
 

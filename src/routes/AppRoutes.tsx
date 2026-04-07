@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 import { useLocation, Route, Routes } from "react-router-dom";
 import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
@@ -15,12 +15,6 @@ const Checkout = lazy(() => import("../pages/Checkout"));
 const Orders = lazy(() => import("../pages/Orders"));
 const OrderDetail = lazy(() => import("../pages/OrderDetail"));
 const CategoryPage = lazy(() => import("../pages/CategoryPage"));
-
-function PageLoader() {
-  return (
-    <PageLoader />
-  );
-}
 
 function AppRoutes() {
   const { pathname } = useLocation();

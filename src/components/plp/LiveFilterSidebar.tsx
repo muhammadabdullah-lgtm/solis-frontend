@@ -8,7 +8,6 @@ import CategoryNode from "./CategoryNode";
 import AccordionSection from "../common/AccordionSection";
 import { Search, XCircle } from "lucide-react";
 import Button from "../ui/Button";
-import SelectableItem from "../common/SelectableItem";
 
 export interface LiveFilterDraft {
   categoryId: number | null;

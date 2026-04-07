@@ -3,7 +3,6 @@ import type { KeyboardEvent } from "react";
 import { Search, X } from "lucide-react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
 import Button from "../ui/Button";
-import Input from "../ui/Input";
 
 const SearchBar = () => {
   const navigate = useNavigate();

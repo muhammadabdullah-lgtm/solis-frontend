@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCart } from "../features/cart/context/CartContext";
+import { useCart } from "../features/cart/hooks/useCart";
 import { placeOrder } from "../services/orders.service";
 import { ApiError } from "../lib/ApiError";
 import { checkoutSchema } from "../lib/schemas";

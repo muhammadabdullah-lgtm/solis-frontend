@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useCategories } from "../../features/categories/context/CategoriesContext";
+import { useCategories } from "../../features/categories/hooks/useCategories";
 import SectionError from "../ui/SectionError";
 import SectionEmpty from "../ui/SectionEmpty";
 import SectionTitle from "../common/SectionTitle";

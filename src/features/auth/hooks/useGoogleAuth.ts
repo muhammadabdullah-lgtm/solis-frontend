@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import type { CredentialResponse } from "@react-oauth/google";
 import { googleAuth, ApiError } from "../../../services/auth.service";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "./useAuth";
 
 export function useGoogleAuth(
   setErrors: (errors: string[]) => void,

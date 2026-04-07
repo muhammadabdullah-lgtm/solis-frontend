@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronRight } from "lucide-react";
-import { useCategories } from "../features/categories/context/CategoriesContext";
+import { useCategories } from "../features/categories/hooks/useCategories";
 import SectionTitle from "../components/common/SectionTitle";
 import DataNotFound from "../components/common/DataNotFound";
 import Skelton from "../components/common/Skelton";
