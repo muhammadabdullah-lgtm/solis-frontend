@@ -1,395 +1,109 @@
-import { useState, useRef, useEffect, useMemo } from "react";
-import type { ReactNode } from "react";
-import { useNavigate, useLocation, Link } from "react-router-dom";
-import {
-  Menu,
-  X,
-  MapPin,
-  User,
-  ChevronDown,
-  LogOut,
-} from "lucide-react";
-import { useCart } from "../../features/cart/hooks/useCart";
-import { useAuth } from "../../features/auth/hooks/useAuth";
-import { useCategories } from "../../features/categories/hooks/useCategories";
-import type { ApiCategory } from "../../services/categories.service";
-import Button from "../ui/Button";
-import SearchBar from "./SearchBar";
-import TextLink from "../common/TextLink";
-import CartButton from "../common/CartButton";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
-const Header = () => {
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
-  const [hoveredCategoryId, setHoveredCategoryId] = useState<number | null>(null);
-  const accountRef = useRef<HTMLDivElement>(null);
-
-  const { cartCount } = useCart();
-  const { user, isAuthenticated, signOut } = useAuth();
-  const { categories } = useCategories();
-  const navigate = useNavigate();
-  const { pathname, search } = useLocation();
-
-
-  const catById = useMemo(
-    () => new Map(categories.map((c) => [c.id, c])),
-    [categories],
-  );
-
-  const { rootSlugById, subSlugById } = useMemo(() => {
-    const rootSlugById = new Map<number, string>();
-    const subSlugById = new Map<number, string>();
-    for (const cat of categories) {
-      for (const sub of cat.subcategories ?? []) {
-        rootSlugById.set(sub.id, cat.slug);
-        subSlugById.set(sub.id, sub.slug);
-        for (const leaf of sub.subcategories ?? []) {
-          rootSlugById.set(leaf.id, cat.slug);
-          subSlugById.set(leaf.id, sub.slug);
-        }
-      }
-    }
-    return { rootSlugById, subSlugById };
-  }, [categories]);
-
-  const isActiveCat = (catId: number | null) => {
-    if (catId === null) return pathname === "/";
-    const cat = catById.get(catId);
-    if (!cat) return false;
-    return pathname.startsWith(`/products/${cat.slug}`);
-  };
-
-  const handleCategoryClick = (catId: number | null) => {
-    if (catId === null) {
-      navigate("/");
-    } else {
-      const cat = catById.get(catId);
-      if (cat) {
-        navigate(`/products/${cat.slug}`);
-      } else {
-        const rootSlug = rootSlugById.get(catId);
-        const subSlug = subSlugById.get(catId);
-        if (rootSlug && subSlug) {
-          navigate(`/products/${rootSlug}/${subSlug}?category_id=${catId}`);
-        }
-      }
-    }
-    setHoveredCategoryId(null);
-    setDrawerOpen(false);
-  };
-
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (accountRef.current && !accountRef.current.contains(e.target as Node)) {
-        setAccountOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  // Close mega-menu on route change
-  useEffect(() => {
-    setHoveredCategoryId(null);
-  }, [pathname, search]);
-
-  const hoveredCategory = categories.find((c) => c.id === hoveredCategoryId);
+export default function Header() {
+  const [searchValue, setSearchValue] = useState("");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50">
+    <header className="bg-[#FEEE00] w-full">
+      <div className="h-[60px] flex items-center px-4 md:px-[24px] gap-4 md:gap-6">
+        {/* Logo */}
+        <Link to="/" className="flex-shrink-0 flex items-center" aria-label="noon logo, click to go to homepage">
+          <svg width="79" height="20" viewBox="0 0 79 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <g clipPath="url(#clip0_3312_14939)">
+              <path d="M71.1275 0C69.0388 0 67.1437 0.67931 65.6899 1.93L65.2709 0.447583H61.5855V19.0842H66.2708V8.958C66.2708 6.80262 67.7151 4.61867 70.4736 4.61867C72.6322 4.61867 73.9178 6.13918 73.9178 8.68183V19.0873H78.6031V8.339C78.6031 3.27275 75.67 0 71.1275 0ZM33.6798 9.75159C33.6798 12.7259 31.7403 14.8845 29.0643 14.8845C26.3883 14.8845 24.4488 12.7259 24.4488 9.75159C24.4488 6.77723 26.3883 4.61867 29.0643 4.61867C31.7371 4.61867 33.6798 6.77723 33.6798 9.75159ZM29.0611 0C23.8076 0 19.6905 4.28219 19.6905 9.74841C19.6905 15.2146 23.8044 19.5 29.0611 19.5C34.3147 19.5 38.4318 15.2178 38.4318 9.74841C38.4318 4.28219 34.3178 0 29.0611 0ZM54.1543 9.75159C54.1543 12.7259 52.2116 14.8845 49.5388 14.8845C46.866 14.8845 44.9233 12.7259 44.9233 9.75159C44.9233 6.77723 46.866 4.61867 49.5388 4.61867C52.2148 4.61867 54.1543 6.77723 54.1543 9.75159ZM49.5388 0C44.2853 0 40.1682 4.28219 40.1682 9.74841C40.1682 15.2146 44.2821 19.5 49.5388 19.5C54.7924 19.5 58.9095 15.2178 58.9095 9.74841C58.9095 4.28219 54.7955 0 49.5388 0ZM9.54208 0C7.45654 0 5.55828 0.67931 4.10125 1.93L3.68224 0.447583H0V19.0842H4.68533V8.958C4.68533 6.80262 6.12966 4.61867 8.88816 4.61867C11.0467 4.61867 12.3323 6.13918 12.3323 8.68183V19.0873H17.0177V8.339C17.0177 3.27275 14.0846 0 9.54208 0Z" fill="#101628"/>
+            </g>
+            <defs>
+              <clipPath id="clip0_3312_14939">
+                <rect width="79" height="20" fill="white"/>
+              </clipPath>
+            </defs>
+          </svg>
+        </Link>
 
+        {/* Location Button - hidden on mobile */}
+        <button className="hidden md:flex items-center gap-1.5 flex-shrink-0" aria-label="Select delivery location">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.5038 4.49625C16.0125 3.005 14.1613 2.25 12 2.25C9.83875 2.25 7.9875 3.00625 6.49625 4.49625C5.005 5.98625 4.25 7.9175 4.25 10.2325C4.25 11.7537 4.86875 13.485 6.09 15.3787C7.02125 16.8237 8.3575 18.4113 10.06 20.0963C10.595 20.6263 11.2975 20.89 12 20.89C12.7025 20.89 13.405 20.625 13.94 20.0963C15.6425 18.4113 16.9775 16.8237 17.91 15.3787C19.1313 13.485 19.75 11.7537 19.75 10.2325C19.75 7.91625 18.9938 5.98625 17.5038 4.49625ZM16.6488 14.5662C15.7762 15.92 14.51 17.4225 12.8838 19.0312C12.3963 19.5138 11.6025 19.5138 11.115 19.0312C9.49 17.4225 8.22375 15.92 7.35 14.5662C6.2875 12.9187 5.74875 11.4613 5.74875 10.2325C5.74875 8.3025 6.34 6.7725 7.55625 5.55625C8.7725 4.34 10.2262 3.74875 11.9987 3.74875C13.7712 3.74875 15.225 4.34 16.4413 5.55625C17.6575 6.7725 18.2487 8.3025 18.2487 10.2325C18.2487 11.46 17.71 12.9175 16.6475 14.5662H16.6488Z" fill="black"/>
+            <path d="M11.9388 7.50125C10.5588 7.535 9.4675 8.68125 9.50125 10.0613C9.535 11.4413 10.6812 12.5325 12.0612 12.4988C13.4412 12.465 14.5325 11.3188 14.4987 9.93875C14.465 8.55875 13.3188 7.4675 11.9388 7.50125Z" fill="black"/>
+          </svg>
+          <span className="font-currency font-semibold text-[15px] text-[#101628]">Other</span>
+          <span className="w-[3px] h-[3px] rounded-full bg-[#101628]"></span>
+          <span className="font-currency font-normal text-[15px] text-[#101628]">Dubai</span>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 7L7.5286 10.5286C7.75082 10.7508 7.86193 10.8619 8 10.8619C8.13807 10.8619 8.24918 10.7508 8.4714 10.5286L12 7" stroke="#101628" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
 
-      <div className="bg-[#feee00]">
-        <div className="mx-auto px-4 lg:px-8">
-
-
-          <div className="hidden md:flex items-center gap-4 h-16">
-            <Link
-              to="/"
-              className="text-2xl font-black text-black tracking-tight shrink-0 hover:opacity-75 transition-opacity"
-            >
-              solis
-            </Link>
-
-            <button className="flex items-center gap-1 text-xs font-semibold text-black shrink-0 hover:opacity-75 transition-opacity whitespace-nowrap">
-              <MapPin size={13} strokeWidth={2.5} />
-              <span>UAE</span>
-              <ChevronDown size={12} strokeWidth={2.5} />
-            </button>
-
-            <div className="flex-1">
-              <SearchBar />
-            </div>
-
-            <div className="flex items-center gap-5 shrink-0">
-              {!isAuthenticated && (
-                <NavAction
-                  icon={<User size={20} />}
-                  label="Sign In"
-                  onClick={() => navigate("/sign-in")}
-                />
-              )}
-
-              {isAuthenticated && (
-
-
-
-<div className="relative" ref={accountRef}>
-  <Button
-    onClick={() => setAccountOpen((o) => !o)}
-    variant="ghost"
-    className="flex flex-col items-center gap-0.5 text-black hover:opacity-70"
-  >
-    <div className="w-6 h-6 bg-black text-[#feee00] rounded-full flex items-center justify-center text-[10px] font-bold leading-none">
-      {user?.name.charAt(0).toUpperCase()}
-    </div>
-    <span className="text-[11px] font-medium leading-none">
-      {user?.name.split(" ")[0]}
-    </span>
-  </Button>
-
-  {accountOpen && (
-    <div className="absolute right-0 top-full mt-2 w-44 bg-white rounded-xl border border-gray-100 shadow-lg py-1 z-50">
-      <p className="px-4 py-2 text-xs text-gray-400 border-b border-gray-100 truncate">
-        {user?.email}
-      </p>
-
-      <Link
-        to="/orders"
-        onClick={() => setAccountOpen(false)}
-        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-      >
-        My Orders
-      </Link>
-
-      <Button
-        variant="danger"
-        size="md"
-        fullWidth
-        className="rounded-none border-t border-gray-100 justify-start font-normal"
-        onClick={() => {
-          signOut();
-          setAccountOpen(false);
-        }}
-      >
-        <LogOut size={14} /> Sign Out
-      </Button>
-    </div>
-  )}
-</div>
-
-              )}
-
-              <CartButton count={cartCount} onClick={() => navigate("/cart")} />
-            </div>
+        {/* Search Bar */}
+        <div className="flex-1 min-w-0 mx-2 md:mx-0">
+          <div className="flex items-center bg-white rounded-xl border border-black/[0.07] h-11 px-4 gap-3 w-full">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" className="flex-shrink-0">
+              <path fillRule="evenodd" clipRule="evenodd" d="M2.4457 8.08609C2.4457 4.86959 5.0532 2.2621 8.26971 2.2621C11.4862 2.2621 14.0937 4.86959 14.0937 8.08609C14.0937 11.3026 11.4862 13.9101 8.26971 13.9101C5.0532 13.9101 2.4457 11.3026 2.4457 8.08609ZM8.26971 0.5C4.08001 0.5 0.683594 3.89641 0.683594 8.08609C0.683594 12.2758 4.08001 15.6722 8.26971 15.6722C10.0468 15.6722 11.6811 15.0611 12.9741 14.0377L16.8135 18.1564C17.2304 18.6036 17.935 18.6159 18.3673 18.1836C18.7995 17.7513 18.7872 17.0467 18.34 16.6299L14.2213 12.7906C15.2448 11.4975 15.8558 9.86318 15.8558 8.08609C15.8558 3.89641 12.4594 0.5 8.26971 0.5Z" fill="#101628"/>
+            </svg>
+            <input
+              type="text"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder='Search for "Sunscreen"'
+              className="flex-1 min-w-0 font-figtree text-[16px] text-[#101628] placeholder:text-[#101628]/60 outline-none bg-transparent"
+            />
           </div>
+        </div>
 
+        {/* Right Actions */}
+        <div className="flex items-center gap-1 md:gap-4 flex-shrink-0">
+          {/* Language - hidden on small screens */}
+          <button className="hidden lg:flex items-center gap-1" aria-label="Switch to Arabic">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.1044 19.5618L18.4563 10.4415C18.3526 10.1816 18.1006 10.0117 17.8213 10.0117H16.9093C16.63 10.0117 16.378 10.1816 16.2743 10.4415L12.6262 19.5618C12.486 19.9129 12.657 20.3108 13.007 20.451C13.3581 20.5912 13.756 20.4202 13.8962 20.0702L14.8185 17.7639H19.9121L20.8344 20.0702C20.9416 20.3381 21.1981 20.5 21.4694 20.5C21.5538 20.5 21.6404 20.484 21.7236 20.451C22.0748 20.3108 22.2446 19.9129 22.1044 19.5618ZM15.3657 16.3959L17.3653 11.398L19.3649 16.3959H15.3657Z" fill="#101628"/>
+              <path d="M13.7184 14.9902C12.4552 14.0177 11.3938 12.9472 10.467 11.7753C11.6082 10.1781 12.6171 8.35291 13.707 5.90755H15.9973C16.3746 5.90755 16.6813 5.60088 16.6813 5.22353C16.6813 4.84618 16.3746 4.53951 15.9973 4.53951H10.2971V3.18402C10.2971 2.80667 9.99046 2.5 9.61311 2.5C9.23576 2.5 8.92909 2.80667 8.92909 3.18402V4.53951H3.22894C2.85159 4.53951 2.54492 4.84618 2.54492 5.22353C2.54492 5.60088 2.85159 5.90755 3.22894 5.90755H12.2055C11.4212 7.61987 10.5913 9.18628 9.61425 10.6159C8.7672 9.38008 8.03188 8.04054 7.34103 6.59157H5.82935C6.63991 8.34949 7.57131 10.1097 8.76378 11.7719C7.63743 13.198 6.31272 14.4726 4.66652 15.6046C4.35529 15.819 4.27663 16.2442 4.48981 16.5554C4.62206 16.7481 4.83638 16.8518 5.05413 16.8518C5.18751 16.8518 5.32203 16.8131 5.4406 16.731C7.02524 15.6423 8.40125 14.3768 9.61881 12.8868C10.6198 14.1101 11.7906 15.2649 13.1928 16.3058L13.7195 14.9902H13.7184Z" fill="#101628"/>
+            </svg>
+            <span className="font-cairo font-bold text-[14px] text-[#101628]">العربية</span>
+          </button>
 
-          <div className="flex md:hidden items-center justify-between h-14">
+          {/* Login - hidden on small screens */}
+          <button className="hidden lg:flex items-center gap-1" aria-label="Log in">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11.75 1.97461C17.1401 1.97461 21.5254 6.35994 21.5254 11.75C21.5254 17.1401 17.1401 21.5254 11.75 21.5254C6.35994 21.5254 1.97461 17.1401 1.97461 11.75C1.97461 6.35994 6.35994 1.97461 11.75 1.97461ZM11.75 14.5273C9.42006 14.5273 7.52539 16.423 7.52539 18.7529V18.8027C8.76146 19.546 10.206 19.9746 11.75 19.9746C13.294 19.9746 14.7385 19.546 15.9746 18.8027V18.7529C15.9746 16.423 14.0799 14.5273 11.75 14.5273ZM11.75 3.52344C7.21506 3.52344 3.52539 7.21408 3.52539 11.749C3.52547 14.0849 4.50612 16.1938 6.0752 17.6924C6.5737 15.0126 8.92787 12.9775 11.75 12.9775C14.5717 12.9775 16.9246 15.0122 17.4248 17.6914C18.9931 16.1928 19.9745 14.0852 19.9746 11.749C19.9746 7.21408 16.2849 3.52344 11.75 3.52344ZM11.751 5.47656C13.5572 5.47656 15.0262 6.94479 15.0264 8.75098C15.0264 10.5573 13.5573 12.0264 11.751 12.0264C9.9448 12.0262 8.47656 10.5572 8.47656 8.75098C8.47671 6.94489 9.94489 5.47671 11.751 5.47656ZM11.751 7.02637C10.8 7.02652 10.0265 7.8 10.0264 8.75098C10.0264 9.70208 10.7999 10.4764 11.751 10.4766C12.7022 10.4766 13.4766 9.70217 13.4766 8.75098C13.4764 7.79991 12.7021 7.02637 11.751 7.02637Z" fill="#101628" stroke="#101628" strokeWidth="0.05"/>
+            </svg>
+            <span className="font-figtree font-semibold text-[15px] text-[#101628]">Log in</span>
+          </button>
 
-            <Button
-  variant="ghost"
-  size="sm"
-  onClick={() => setDrawerOpen((o) => !o)}
-  className="p-1 -ml-1" // preserve your custom positioning
-  aria-label="Toggle menu"
->
-  {drawerOpen ? <X size={22} /> : <Menu size={22} />}
-</Button>
+          {/* Orders - hidden on small screens */}
+          <button className="hidden lg:flex items-center gap-1 rounded-xl p-2" aria-label="Orders">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 13.2856V8.3999H21V13.2856C21 16.9221 21 18.7404 19.8284 19.8701C18.6569 20.9999 16.7712 20.9999 13 20.9999H11C7.22876 20.9999 5.34315 20.9999 4.17157 19.8701C3 18.7404 3 16.9221 3 13.2856Z" stroke="#101628" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 8.4L3.86538 6.32308C4.53654 4.71231 4.87211 3.90693 5.55231 3.45346C6.23251 3 7.105 3 8.85 3H15.15C16.895 3 17.7675 3 18.4477 3.45346C19.1279 3.90693 19.4635 4.71231 20.1346 6.32308L21 8.4" stroke="#101628" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M12 8.4V3" stroke="#101628" strokeWidth="1.5" strokeLinecap="round"/>
+              <path d="M10.1992 12H13.7992" stroke="#101628" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+            <span className="font-figtree font-semibold text-[15px] text-[#101628]">Orders</span>
+          </button>
 
-            <Link
-              to="/"
-              className="text-xl font-black text-black tracking-tight"
-            >
-              solis
-            </Link>
+          {/* Wishlist - hidden on small screens */}
+          <button className="hidden lg:flex items-center gap-1 rounded-xl p-2" aria-label="Wishlist">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11.8219 21.5C11.7533 21.5 11.6832 21.4916 11.6159 21.4748C11.4211 21.4257 6.78973 20.201 3.31442 14.3644C1.3021 10.9844 1.63282 6.77056 4.08375 4.56065C5.56076 3.22798 7.29563 2.7249 8.96602 3.1439C10.1151 3.43258 11.1045 4.13044 11.8219 5.131C12.5394 4.13044 13.5288 3.43258 14.6779 3.1439C16.3483 2.7249 18.0817 3.22798 19.5601 4.56065C22.0096 6.77056 22.3404 10.9858 20.3294 14.3644C16.8541 20.201 12.2241 21.4257 12.0279 21.4748C11.9607 21.4916 11.892 21.5 11.8219 21.5ZM7.82112 4.68397C6.93408 4.68397 6.02881 5.06934 5.20903 5.80924C3.37328 7.46422 3.1757 10.8456 4.75921 13.5054C6.37775 16.2254 8.26674 17.8033 9.56578 18.6483C10.607 19.3265 11.4492 19.6544 11.8219 19.782C12.1933 19.6558 13.0341 19.3265 14.0781 18.6483C15.3771 17.8033 17.2661 16.2254 18.8847 13.5054C20.4682 10.8456 20.2706 7.46562 18.4348 5.80924C17.3866 4.86334 16.1983 4.49619 15.0884 4.77506C13.9758 5.05392 13.0733 5.94517 12.6151 7.22039C12.4946 7.55391 12.1779 7.77672 11.8233 7.77672C11.4688 7.77672 11.1507 7.55391 11.0316 7.22039C10.5733 5.94517 9.67089 5.05392 8.55823 4.77506C8.31579 4.7148 8.07056 4.68397 7.82252 4.68397H7.82112Z" fill="#101628"/>
+            </svg>
+            <span className="font-currency font-semibold text-[15px] text-[#101628]">Wishlist</span>
+          </button>
 
-            <CartButton count={cartCount} onClick={() => navigate("/cart")} />
-          </div>
-
-          <div className="md:hidden pb-3">
-            <SearchBar />
-          </div>
+          {/* Cart */}
+          <button className="flex items-center gap-1" aria-label="Cart">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8.75049 22.25C9.71699 22.25 10.5005 21.4665 10.5005 20.5C10.5005 19.5335 9.71699 18.75 8.75049 18.75C7.78399 18.75 7.00049 19.5335 7.00049 20.5C7.00049 21.4665 7.78399 22.25 8.75049 22.25Z" fill="#101628"/>
+              <path d="M17.7505 22.25C18.579 22.25 19.2505 21.5784 19.2505 20.75C19.2505 19.9216 18.579 19.25 17.7505 19.25C16.9221 19.25 16.2505 19.9216 16.2505 20.75C16.2505 21.5784 16.9221 22.25 17.7505 22.25Z" fill="#101628"/>
+              <path d="M10.2505 8C9.83674 8 9.50049 8.33625 9.50049 8.75V11.75C9.50049 12.1637 9.83674 12.5 10.2505 12.5C10.6643 12.5 11.0005 12.1637 11.0005 11.75V8.75C11.0005 8.33625 10.6643 8 10.2505 8Z" fill="#101628"/>
+              <path d="M13.7505 8C13.3368 8 13.0005 8.33625 13.0005 8.75V11.75C13.0005 12.1637 13.3368 12.5 13.7505 12.5C14.1643 12.5 14.5005 12.1637 14.5005 11.75V8.75C14.5005 8.33625 14.1643 8 13.7505 8Z" fill="#101628"/>
+              <path d="M17.2505 8C16.8368 8 16.5005 8.33625 16.5005 8.75V11.75C16.5005 12.1637 16.8368 12.5 17.2505 12.5C17.6643 12.5 18.0005 12.1637 18.0005 11.75V8.75C18.0005 8.33625 17.6643 8 17.2505 8Z" fill="#101628"/>
+              <path d="M21.9257 5.5975C21.5932 5.2175 21.1132 5 20.6095 5H6.8082L6.72696 4.38625C6.54571 3.02625 5.3732 2 4.0007 2H2.75195C2.3382 2 2.00195 2.33625 2.00195 2.75C2.00195 3.16375 2.3382 3.5 2.75195 3.5H4.0007C4.62445 3.5 5.15696 3.96625 5.23946 4.585L6.66071 15.2463C6.90821 17.1012 8.5057 18.5012 10.3782 18.5012H19.752C20.1657 18.5012 20.502 18.165 20.502 17.7512C20.502 17.3375 20.1657 17.0012 19.752 17.0012H10.3782C9.2557 17.0012 8.29696 16.1613 8.14821 15.0487L8.14445 15.0162C8.6907 15.325 9.31695 15.5013 9.97945 15.5013H17.927C19.7982 15.5013 21.397 14.1025 21.6445 12.2475L22.347 6.98375C22.4132 6.48375 22.2607 5.97875 21.9295 5.6L21.9257 5.5975ZM20.8557 6.7825L20.1532 12.0463C20.0044 13.16 19.0457 13.9987 17.9232 13.9987H9.97571C8.85321 13.9987 7.89445 13.16 7.7457 12.0463L7.00571 6.49875H20.6069C20.7057 6.49875 20.7669 6.5525 20.7944 6.58375C20.8219 6.615 20.8669 6.68375 20.8544 6.78125L20.8557 6.7825Z" fill="#101628"/>
+            </svg>
+            <span className="font-currency font-semibold text-[15px] text-[#101628] hidden sm:inline">Cart</span>
+          </button>
         </div>
       </div>
-
-
-      <div
-        className="bg-white border-b border-gray-200 shadow-sm relative"
-        onMouseLeave={() => setHoveredCategoryId(null)}
-      >
-        <div className="mx-auto px-4 lg:px-8">
-          <div
-            className="flex items-center gap-1 overflow-x-auto py-2"
-            style={{ scrollbarWidth: "none" }}
-          >
-            {categories.map((cat) => (
-<Button
-  key={cat.id}
-  variant="chip"
-  size="sm"
-  data-active={isActiveCat(cat.id)}
-  onClick={() => handleCategoryClick(cat.id)}
-  onMouseEnter={() => setHoveredCategoryId(cat.id)}
-  className="whitespace-nowrap shrink-0"
->
-  {cat.name}
-</Button>
- 
-            ))}
-          </div>
-        </div>
-
-
-        {hoveredCategory && (hoveredCategory.subcategories?.length ?? 0) > 0 && (
-          <div
-            className="absolute top-full left-0 w-full bg-white border-t border-gray-100 shadow-xl z-40"
-            onMouseEnter={() => setHoveredCategoryId(hoveredCategory.id)}
-          >
-            <div className="max-w-7xl mx-auto px-4 lg:px-8 py-6">
-              <MegaMenu
-                category={hoveredCategory}
-                onNavigate={handleCategoryClick}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-
-      {drawerOpen && (
-        <div className="md:hidden bg-white border-b shadow-lg">
-          <nav className="px-4 py-2 divide-y divide-gray-100">
-            {!isAuthenticated ? (
-              <DrawerItem
-                icon={<User size={18} />}
-                label="Sign In / Register"
-                onClick={() => {
-                  navigate("/sign-in");
-                  setDrawerOpen(false);
-                }}
-              />
-            ) : (
-              <DrawerItem
-                icon={<LogOut size={18} />}
-                label={`Sign Out (${user?.name.split(" ")[0]})`}
-                onClick={() => {
-                  signOut();
-                  setDrawerOpen(false);
-                }}
-                danger
-              />
-            )}
-            <DrawerItem icon={<MapPin size={18} />} label="Deliver to UAE" />
-            <div className="pt-3 pb-2">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-                Categories
-              </p>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => handleCategoryClick(cat.id)}
-                  className={`block w-full text-left py-2 text-sm transition-colors ${
-                    isActiveCat(cat.id)
-                      ? "text-black font-semibold"
-                      : "text-gray-700 hover:text-black"
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
-          </nav>
-        </div>
-      )}
     </header>
   );
-};
-
-
-
-const MegaMenu = ({
-  category,
-  onNavigate,
-}: {
-  category: ApiCategory;
-  onNavigate: (catId: number) => void;
-}) => {
-  const cols = category.subcategories ?? [];
-
-  return (
-    <div
-      className="grid gap-8"
-      style={{
-        gridTemplateColumns: `repeat(${Math.min(cols.length, 5)}, minmax(0, 1fr))`,
-      }}
-    >
-      {cols.map((sub) => (
-        <div key={sub.id}>
-          <button
-            onClick={() => onNavigate(sub.id)}
-            className="text-sm font-semibold text-gray-900 hover:text-black mb-2 block text-left"
-          >
-            {sub.name}
-          </button>
-          {(sub.subcategories?.length ?? 0) > 0 && (
-            <ul className="space-y-1.5">
-              {sub.subcategories!.map((leaf) => (
-                <li key={leaf.id}>
-                  <TextLink onClick={() => onNavigate(leaf.id)}>
-  {leaf.name}
-</TextLink>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-};
-
-const NavAction = ({
-  icon,
-  label,
-  onClick,
-}: {
-  icon: ReactNode;
-  label: string;
-  onClick: () => void;
-}) => (
-  <button
-    onClick={onClick}
-    className="flex flex-col items-center gap-0.5 text-black hover:opacity-70 transition-opacity"
-  >
-    {icon}
-    <span className="text-[11px] font-medium leading-none">{label}</span>
-  </button>
-);
-
-
-
-const DrawerItem = ({
-  icon,
-  label,
-  onClick,
-  danger,
-}: {
-  icon: ReactNode;
-  label: string;
-  onClick?: () => void;
-  danger?: boolean;
-}) => (
-  <button
-    onClick={onClick}
-    className={`flex items-center gap-3 w-full py-3 text-sm transition-colors ${
-      danger ? "text-red-500 hover:text-red-600" : "text-gray-700 hover:text-black"
-    }`}
-  >
-    <span className={danger ? "text-red-400" : "text-gray-500"}>{icon}</span>
-    {label}
-  </button>
-);
-
-export default Header;
+}

@@ -2,17 +2,30 @@ import HeroCarousel from "../components/home/HeroCarousel";
 import FeaturedCategories from "../components/home/FeaturedCategories";
 import NewArrivals from "../components/home/NewArrivals";
 import TopBrands from "../components/home/TopBrands";
+import Layout from "../components/layout";
 
 const Home  =  () => {
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="mx-auto px-4 lg:px-8 py-6 space-y-10">
-        <HeroCarousel />
+    <Layout>
+
+
+<div className="pt-[2px] px-4 md:px-[24px]  bg-white" >
+  
+
+      <HeroCarousel />
         <FeaturedCategories />
         <NewArrivals />
         <TopBrands />
-      </div>
-    </div>
+
+
+</div>
+
+  
+
+
+      
+    </Layout>
+
   );
 }
 

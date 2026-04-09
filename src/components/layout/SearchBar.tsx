@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import type { KeyboardEvent } from "react";
 import { Search, X } from "lucide-react";
 import { useNavigate, useLocation, useSearchParams } from "react-router-dom";
-import Button from "../ui/Button";
 
 const SearchBar = () => {
   const navigate = useNavigate();
@@ -14,18 +13,6 @@ const SearchBar = () => {
     isProductsPage ? (searchParams.get("q") ?? "") : "",
   );
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-
-  useEffect(() => {
-    if (isProductsPage) {
-      setQuery(searchParams.get("q") ?? "");
-    }
-  }, [searchParams, isProductsPage]);
-
-
-  useEffect(() => {
-    if (!isProductsPage) setQuery("");
-  }, [isProductsPage]);
 
   const doSearch = (q: string) => {
     const trimmed = q.trim();
@@ -75,45 +62,35 @@ const SearchBar = () => {
   );
 
   return (
-    <div className="flex items-center bg-white rounded-md overflow-hidden h-10 shadow-sm">
-      <div className="relative flex-1 flex items-center">
-        <input
-          type="text"
-          placeholder="What are you looking for?"
-          value={query}
-          onChange={handleChange}
-          onKeyDown={handleKeyDown}
-          className="w-full pl-4 pr-8 h-10 outline-none text-sm text-gray-700 placeholder:text-gray-400"
-        />
-        {query && (
-          <Button
-  variant="ghost"
-  size="sm"
-  onClick={handleClear}
-  aria-label="Clear search"
-  className="
-    absolute right-2 
-    p-0 m-0 
-    text-gray-400 hover:text-gray-600 
-    hover:bg-transparent
-    rounded-none
-    w-auto h-auto
-    min-w-0
-  "
->
-  <X size={14} />
-</Button>
-     
-        )}
-      </div>
-      <Button
-        variant="dark"
-        onClick={handleSubmit}
-        aria-label="Search"
-        className="h-full rounded-none shrink-0"
-      >
-        <Search size={18} />
-      </Button>
+    <div className="relative">
+      <input
+        type="text"
+        placeholder="What are you looking for?"
+        value={query}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+        className="h-11 w-full rounded-md border-none bg-white pl-4 pr-12 text-sm font-medium text-gray-800 outline-none ring-0 placeholder:text-gray-500 focus:ring-2 focus:ring-blue-500"
+      />
+
+      {query ? (
+        <button
+          type="button"
+          onClick={handleClear}
+          aria-label="Clear search"
+          className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center text-gray-400 transition-colors hover:text-gray-700"
+        >
+          <X size={16} />
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleSubmit}
+          aria-label="Search"
+          className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center text-gray-500 transition-colors hover:text-gray-700"
+        >
+          <Search size={18} />
+        </button>
+      )}
     </div>
   );
 }

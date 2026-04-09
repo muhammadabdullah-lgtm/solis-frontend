@@ -12,7 +12,7 @@ const TopBrands = () => {
   if (loading) return null;
 
   return (
-    <section>
+    <section className="pb-5" >
       <SectionTitle>Top Brands</SectionTitle>
 
       {error ? (

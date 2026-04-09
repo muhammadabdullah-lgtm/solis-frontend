@@ -13,6 +13,7 @@ import DataNotFound from "../components/common/DataNotFound";
 import QuantityStepper from "../components/common/QuantityStepper";
 import StockBadge from "../components/common/StockBadge";
 import BackButton from "../components/common/BackButton";
+import Layout from "../components/layout";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -57,7 +58,11 @@ const ProductDetail = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+
+    <Layout >
+
+
+ <div className="bg-gray-50 min-h-screen">
       <div className="mx-auto px-4 lg:px-8 py-8">
         <div className="mb-6">
           <BackButton onClick={() => navigate(-1)} />
@@ -173,6 +178,10 @@ const ProductDetail = () => {
         </div>
       </div>
     </div>
+
+
+    </Layout>
+
   );
 };
 

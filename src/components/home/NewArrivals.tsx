@@ -33,7 +33,7 @@ const NewArrivals = () => {
       ) : products.length === 0 ? (
         <SectionEmpty icon="📦" message="No new arrivals yet. Check back soon!" />
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} />
           ))}

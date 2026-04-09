@@ -12,9 +12,7 @@ dist
 dist-ssr
 *.local
 
-# Project
-DOCUMENTATION.md
-.claude
+
 
 
 .env

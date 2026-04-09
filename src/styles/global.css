@@ -1,0 +1,14 @@
+@font-face {
+  font-family: 'currency-symbol-v2';
+  src: url('https://f.nooncdn.com/s/app/com/common/fonts/currency-symbol/currency-symbol-v2.otf') format('opentype');
+  font-weight: 300;
+  font-style: normal;
+  unicode-range: U+E000, U+E001;
+  font-display: swap;
+}
+
+body {
+  margin: 0;
+  box-sizing: border-box;
+}
+

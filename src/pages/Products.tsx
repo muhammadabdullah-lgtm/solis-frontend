@@ -15,6 +15,7 @@ import SectionError from "../components/ui/SectionError";
 import SectionEmpty from "../components/ui/SectionEmpty";
 import PaginationBar from "../components/common/PaginationBar";
 import ProductGridSkeleton from "../components/common/ProductGridSkeleton";
+import Layout from "../components/layout";
 
 
 
@@ -293,7 +294,10 @@ const  Products = () => {
   );
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+
+    <Layout>
+
+ <div className="bg-white  min-h-screen">
       <div className="mx-auto px-4 lg:px-8 py-8">
         <div className="flex gap-6 items-start">
           <aside className="hidden lg:block w-64 shrink-0 sticky top-[120px]">
@@ -409,6 +413,11 @@ const  Products = () => {
         </div>
       )}
     </div>
+
+
+    </Layout>
+
+
   );
 }
 

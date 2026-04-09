@@ -4,6 +4,7 @@ import Header from "../components/layout/Header";
 import Footer from "../components/layout/Footer";
 import ProtectedRoute from "./ProtectedRoute";
 import { AUTH_ROUTES } from "../lib/constants";
+import CategoryNav from "../components/layout/CategoryNavBar";
 
 const Home = lazy(() => import("../pages/Home"));
 const Cart = lazy(() => import("../pages/Cart"));
@@ -22,7 +23,7 @@ function AppRoutes() {
 
   return (
     <>
-      {!isAuthPage && <Header />}
+
 
       {/* <Suspense fallback={<PageLoader />}> */}
         <Routes>
@@ -40,7 +41,7 @@ function AppRoutes() {
         </Routes>
       {/* </Suspense> */}
 
-      {!isAuthPage && <Footer />}
+      {/* {!isAuthPage && <Footer />} */}
     </>
   );
 }
