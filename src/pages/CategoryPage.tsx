@@ -6,6 +6,7 @@ import DataNotFound from "../components/common/DataNotFound";
 import Skelton from "../components/common/Skelton";
 import Button from "../components/ui/Button";
 import CategoriesTable from "../components/common/CategoriesTable";
+import Layout from "../components/layout";
 
 const CategoryPage = () => {
   const { rootSlug: slug = "" } = useParams<{ rootSlug: string }>();
@@ -37,16 +38,15 @@ const CategoryPage = () => {
   }
 
   return (
-    <div className="bg-gray-50 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 lg:px-8 py-10">
-
-        <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-6">
-
-<Button
-  variant="ghost"
-  size="sm"
-  onClick={() => navigate("/")}
-  className="
+    <Layout>
+      <div className="bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 lg:px-8 py-10">
+          <nav className="flex items-center gap-1.5 text-xs text-gray-400 mb-6">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate("/")}
+              className="
     hover:text-black 
     p-0 m-0
     hover:bg-transparent
@@ -55,28 +55,24 @@ const CategoryPage = () => {
     min-w-0
     font-normal
   "
->
-  Home
-</Button>
+            >
+              Home
+            </Button>
 
-          <ChevronRight size={12} />
-          <span className="text-gray-700 font-medium">{category.name}</span>
-        </nav>
+            <ChevronRight size={12} />
+            <span className="text-gray-700 font-medium">{category.name}</span>
+          </nav>
 
-        <SectionTitle>{category.name}</SectionTitle>
+          <SectionTitle>{category.name}</SectionTitle>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
-          {subcategories.map((subcat) => {
-            
-            return (
-
-              <CategoriesTable subcat={subcat} slug={slug} />
-
-            );
-          })}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+            {subcategories.map((subcat) => {
+              return <CategoriesTable subcat={subcat} slug={slug} />;
+            })}
+          </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

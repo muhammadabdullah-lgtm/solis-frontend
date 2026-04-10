@@ -12,6 +12,7 @@ import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import OrderDetailLoading from "../components/common/OrderDetailLoading";
 import OrderItems from "../components/common/OrderItems";
+import Layout from "../components/layout";
 
 interface ReviewModalProps {
   item: OrderItem;
@@ -20,7 +21,12 @@ interface ReviewModalProps {
   onSubmitted: (itemId: number) => void;
 }
 
-const ReviewModal = ({ item, currency, onClose, onSubmitted }: ReviewModalProps) => {
+const ReviewModal = ({
+  item,
+  currency,
+  onClose,
+  onSubmitted,
+}: ReviewModalProps) => {
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [body, setBody] = useState("");
@@ -45,16 +51,15 @@ const ReviewModal = ({ item, currency, onClose, onSubmitted }: ReviewModalProps)
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative">
-
-
-        <Button
-  variant="ghost"
-  size="sm"
-  onClick={onClose}
-  aria-label="Close"
-  className="
+    <Layout>
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+        <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            aria-label="Close"
+            className="
     absolute top-4 right-4
     text-gray-400 hover:text-gray-700
     p-0 m-0
@@ -63,86 +68,93 @@ const ReviewModal = ({ item, currency, onClose, onSubmitted }: ReviewModalProps)
     w-auto h-auto
     min-w-0
   "
->
-  <X size={18} />
-</Button>
+          >
+            <X size={18} />
+          </Button>
 
-        <h2 className="text-base font-bold text-gray-900 mb-1">Rate & Review</h2>
+          <h2 className="text-base font-bold text-gray-900 mb-1">
+            Rate & Review
+          </h2>
 
-        <div className="flex gap-3 items-center mb-5 mt-3 bg-gray-50 rounded-xl px-3 py-2.5">
-          <img
-            src={item.product_image_url}
-            alt={item.product_name}
-            className="w-12 h-12 rounded-lg object-cover bg-gray-100 shrink-0"
+          <div className="flex gap-3 items-center mb-5 mt-3 bg-gray-50 rounded-xl px-3 py-2.5">
+            <img
+              src={item.product_image_url}
+              alt={item.product_name}
+              className="w-12 h-12 rounded-lg object-cover bg-gray-100 shrink-0"
+            />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-900 line-clamp-1">
+                {item.product_name}
+              </p>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {currency} {item.unit_price} × {item.quantity}
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs font-semibold text-gray-700 mb-2">
+            Your Rating
+          </p>
+          <div className="flex gap-1 mb-4">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <button
+                key={star}
+                type="button"
+                onClick={() => setRating(star)}
+                onMouseEnter={() => setHovered(star)}
+                onMouseLeave={() => setHovered(0)}
+                className="p-0.5 transition-transform hover:scale-110"
+                aria-label={`${star} star`}
+              >
+                <Star
+                  size={28}
+                  className={
+                    star <= (hovered || rating)
+                      ? "fill-[#feee00] stroke-[#d4c200]"
+                      : "fill-gray-200 stroke-gray-300"
+                  }
+                />
+              </button>
+            ))}
+          </div>
+
+          <p className="text-xs font-semibold text-gray-700 mb-1.5">
+            Review <span className="font-normal text-gray-400">(optional)</span>
+          </p>
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            rows={3}
+            placeholder="Share your experience with this product…"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 outline-none focus:border-[#feee00] focus:ring-2 focus:ring-[#feee00]/40 transition resize-none"
           />
-          <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-900 line-clamp-1">{item.product_name}</p>
-            <p className="text-xs text-gray-400 mt-0.5">
-              {currency} {item.unit_price} × {item.quantity}
-            </p>
+
+          {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
+
+          <div className="flex gap-2 mt-4">
+            <Button
+              variant="outline"
+              size="lg"
+              fullWidth
+              type="button"
+              onClick={onClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              fullWidth
+              type="button"
+              disabled={submitting}
+              onClick={handleSubmit}
+            >
+              {submitting ? "Submitting…" : "Submit Review"}
+            </Button>
           </div>
         </div>
-
-        <p className="text-xs font-semibold text-gray-700 mb-2">Your Rating</p>
-        <div className="flex gap-1 mb-4">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <button
-              key={star}
-              type="button"
-              onClick={() => setRating(star)}
-              onMouseEnter={() => setHovered(star)}
-              onMouseLeave={() => setHovered(0)}
-              className="p-0.5 transition-transform hover:scale-110"
-              aria-label={`${star} star`}
-            >
-              <Star
-                size={28}
-                className={
-                  star <= (hovered || rating)
-                    ? "fill-[#feee00] stroke-[#d4c200]"
-                    : "fill-gray-200 stroke-gray-300"
-                }
-              />
-            </button>
-          ))}
-        </div>
-
-  <p className="text-xs font-semibold text-gray-700 mb-1.5">
-          Review <span className="font-normal text-gray-400">(optional)</span>
-        </p>
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={3}
-          placeholder="Share your experience with this product…"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-800 outline-none focus:border-[#feee00] focus:ring-2 focus:ring-[#feee00]/40 transition resize-none"
-        />
-
-        {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
-
-        <div className="flex gap-2 mt-4">
-          <Button
-            variant="outline"
-            size="lg"
-            fullWidth
-            type="button"
-            onClick={onClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            size="lg"
-            fullWidth
-            type="button"
-            disabled={submitting}
-            onClick={handleSubmit}
-          >
-            {submitting ? "Submitting…" : "Submit Review"}
-          </Button>
-        </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 
@@ -152,7 +164,9 @@ const OrderDetail = () => {
 
   const { order, loading, error } = useOrderDetail(id);
   const [reviewItem, setReviewItem] = useState<OrderItem | null>(null);
-  const [reviewedItemIds, setReviewedItemIds] = useState<Set<number>>(new Set());
+  const [reviewedItemIds, setReviewedItemIds] = useState<Set<number>>(
+    new Set(),
+  );
 
   const handleReviewSubmitted = (itemId: number) => {
     setReviewedItemIds((prev) => new Set(prev).add(itemId));
@@ -160,9 +174,7 @@ const OrderDetail = () => {
   };
 
   if (loading) {
-    return (
-     <OrderDetailLoading />
-    );
+    return <OrderDetailLoading />;
   }
 
   if (error || !order) {
@@ -181,15 +193,25 @@ const OrderDetail = () => {
   return (
     <div className="bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto px-4 lg:px-8 py-8 space-y-6">
-        <BackButton label="Back to Orders" onClick={() => navigate("/orders")} />
+        <BackButton
+          label="Back to Orders"
+          onClick={() => navigate("/orders")}
+        />
 
-        <Card rounded="2xl" className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <Card
+          rounded="2xl"
+          className="px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+        >
           <div>
             <div className="flex items-center gap-2 flex-wrap mb-1">
-              <h1 className="text-lg font-bold text-gray-900">Order #{order.id}</h1>
+              <h1 className="text-lg font-bold text-gray-900">
+                Order #{order.id}
+              </h1>
               <StatusBadge status={order.status} />
             </div>
-            <p className="text-xs text-gray-400">Placed on {formatDate(order.created_at)}</p>
+            <p className="text-xs text-gray-400">
+              Placed on {formatDate(order.created_at)}
+            </p>
           </div>
         </Card>
 
@@ -197,7 +219,9 @@ const OrderDetail = () => {
           <Card rounded="2xl" className="md:col-span-1 px-6 py-5">
             <div className="flex items-center gap-2 mb-3">
               <MapPin size={15} className="text-gray-400" />
-              <h2 className="text-sm font-bold text-gray-900">Delivery Address</h2>
+              <h2 className="text-sm font-bold text-gray-900">
+                Delivery Address
+              </h2>
             </div>
             <div className="text-sm text-gray-700 space-y-0.5">
               <p className="font-semibold">{addr.full_name}</p>
@@ -207,7 +231,10 @@ const OrderDetail = () => {
                 {addr.city}
                 {addr.state ? `, ${addr.state}` : ""}
               </p>
-              <p>{addr.country}{addr.postal_code ? ` ${addr.postal_code}` : ""}</p>
+              <p>
+                {addr.country}
+                {addr.postal_code ? ` ${addr.postal_code}` : ""}
+              </p>
             </div>
             {order.notes && (
               <div className="mt-3 pt-3 border-t border-gray-100">
@@ -226,7 +253,13 @@ const OrderDetail = () => {
               {order.items.map((item) => {
                 const reviewed = reviewedItemIds.has(item.id);
                 return (
-                  <OrderItems item={item} order={order} isDelivered={isDelivered} reviewed={reviewed} setReviewItem={setReviewItem} />
+                  <OrderItems
+                    item={item}
+                    order={order}
+                    isDelivered={isDelivered}
+                    reviewed={reviewed}
+                    setReviewItem={setReviewItem}
+                  />
                 );
               })}
             </div>
